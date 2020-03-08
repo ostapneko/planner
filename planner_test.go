@@ -4,47 +4,44 @@ import "testing"
 
 func Test_checkGraph(t *testing.T) {
 	type args struct {
-		tasks        []Task
-		developers   []Developer
-		supportWeeks []SupportWeek
-		cal          Calendar
+		tasks        []*Task
+		developers   []*Developer
+		supportWeeks []*SupportWeek
+		cal          []Day
 	}
-	task1 := Task{
+	task1 := &Task{
 		Name:         "Task",
 		Attributions: map[DeveloperId]DurationDays{"dev1": 3},
 	}
 
-	dev1 := Developer{
+	dev1 := &Developer{
 		Id:      "dev1",
 		OffDays: []Day{},
 	}
 
-	dev2 := Developer{
+	dev2 := &Developer{
 		Id:      "dev2",
 		OffDays: []Day{},
 	}
 
-	sw1 := SupportWeek{
+	sw1 := &SupportWeek{
 		FirstDay: 10,
 		LastDay:  12,
 		DevId:    "dev1",
 	}
 
-	sw2 := SupportWeek{
+	sw2 := &SupportWeek{
 		FirstDay: 13,
 		LastDay:  14,
 		DevId:    "dev2",
 	}
 
-	invalidSw := SupportWeek{
+	invalidSw := &SupportWeek{
 		FirstDay: 14,
 		LastDay:  13,
 		DevId:    "dev1",
 	}
 
-	cal1 := Calendar{
-		Days: []Day{1, 2, 3},
-	}
 	tests := []struct {
 		name    string
 		args    args
@@ -53,40 +50,40 @@ func Test_checkGraph(t *testing.T) {
 		{
 			name: "valid graph",
 			args: args{
-				tasks:        []Task{task1},
-				developers:   []Developer{dev1},
-				supportWeeks: []SupportWeek{sw1},
-				cal:          cal1,
+				tasks:        []*Task{task1},
+				developers:   []*Developer{dev1},
+				supportWeeks: []*SupportWeek{sw1},
+				cal:          []Day{},
 			},
 			wantErr: false,
 		},
 		{
 			name: "Developer missing from Attributions",
 			args: args{
-				tasks:        []Task{task1},
-				developers:   []Developer{dev2},
-				supportWeeks: []SupportWeek{sw2},
-				cal:          cal1,
+				tasks:        []*Task{task1},
+				developers:   []*Developer{dev2},
+				supportWeeks: []*SupportWeek{sw2},
+				cal:          []Day{},
 			},
 			wantErr: true,
 		},
 		{
 			name: "support week invalid",
 			args: args{
-				tasks:        []Task{task1},
-				developers:   []Developer{dev1},
-				supportWeeks: []SupportWeek{invalidSw},
-				cal:          cal1,
+				tasks:        []*Task{task1},
+				developers:   []*Developer{dev1},
+				supportWeeks: []*SupportWeek{invalidSw},
+				cal:          []Day{},
 			},
 			wantErr: true,
 		},
 		{
 			name: "overlapping support week",
 			args: args{
-				tasks:        []Task{task1},
-				developers:   []Developer{dev1},
-				supportWeeks: []SupportWeek{sw1, sw1},
-				cal:          cal1,
+				tasks:        []*Task{task1},
+				developers:   []*Developer{dev1},
+				supportWeeks: []*SupportWeek{sw1, sw1},
+				cal:          []Day{},
 			},
 			wantErr: true,
 		},

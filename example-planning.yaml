@@ -1,15 +1,20 @@
-calendar: [1, 2, 3, 4, 5, 6, 7]
+calendar:
+  - 01/01/2020
+  - 02/01/2020
+  - 04/01/2020
 developers:
   - id: riri
-    offDays: [2, 4]
+    offDays:
+      - 01/01/2020
   - id: fifi
-    offDays: [1]
+    offDays:
+      - 02/01/2020
 supportWeeks:
-  - firstDay: 1
-    lastDay: 5
+  - firstDay: 01/01/2020
+    lastDay: 07/01/2020
     devId: riri
-  - firstDay: 6
-    lastDay: 7
+  - firstDay: 08/01/2020
+    lastDay: 15/01/2020
     devId: fifi
 tasks:
   - name: Feature 1

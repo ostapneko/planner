@@ -2,6 +2,7 @@ package main
 
 import (
 	"adalongcorp.com/planner"
+	"encoding/json"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"log"
@@ -21,13 +22,21 @@ func main() {
 		log.Fatalf("could not read file %s", inputFile)
 	}
 
-	var planning planner.Planning
+	var planningInput planner.PlanningInput
 
-	err = yaml.Unmarshal(dat, &planning)
+	err = yaml.Unmarshal(dat, &planningInput)
 
 	if err != nil {
 		log.Fatalf("error parsing planning: %s", err)
 	}
 
-	log.Printf("%+v", planning)
+	planning, err := planner.NewPlanning(planningInput)
+
+	if err != nil {
+		log.Fatalf("error transforming planning input into planning: %s", err)
+	}
+
+	doc, _ := json.Marshal(planning)
+
+	log.Printf("%s", doc)
 }
