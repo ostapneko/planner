@@ -1,0 +1,28 @@
+@startuml
+class Task {
+    name: string
+}
+
+class Developer {
+    id: string
+    offDays: []Date
+}
+
+class Attribution {
+    days: int
+}
+
+class SupportWeek {
+    firstDay: Date
+    lastDay: Date
+}
+
+class Calendar {
+    days: []Date
+}
+
+Attribution "1" *-- "1" Developer
+Task "1" o-- "n" Attribution
+SupportWeek "1" *-- "1" Developer
+
+@enduml
