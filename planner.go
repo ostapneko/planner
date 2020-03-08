@@ -4,37 +4,37 @@ import (
 	"fmt"
 )
 
-type developerId string
+type DeveloperId string
 
-type durationDays int
+type DurationDays int
 
-type day int
+type Day int
 
-type task struct {
-	name         string
-	attributions map[developerId]durationDays
+type Task struct {
+	Name         string
+	Attributions map[DeveloperId]DurationDays
 }
 
-type developer struct {
-	id      developerId
-	offDays []day
+type Developer struct {
+	Id      DeveloperId
+	OffDays []Day
 }
 
-type calendar struct {
-	days []day
+type Calendar struct {
+	Days []Day
 }
 
-type supportWeek struct {
-	firstDay day
-	lastDay  day
-	devId developerId
+type SupportWeek struct {
+	FirstDay Day
+	LastDay  Day
+	DevId    DeveloperId
 }
 
 // tasks are sorted in priority order: highest priority first
-func checkGraph(tasks []task, developers []developer, supportWeeks []supportWeek, cal calendar) error {
-	devMap := make(map[developerId]developer, len(developers))
+func CheckGraph(tasks []Task, developers []Developer, supportWeeks []SupportWeek, cal Calendar) error {
+	devMap := make(map[DeveloperId]Developer, len(developers))
 	for _, dev := range developers {
-		devMap[dev.id] = dev
+		devMap[dev.Id] = dev
 	}
 
 	err := checkDevAttributions(tasks, devMap)
@@ -52,30 +52,30 @@ func checkGraph(tasks []task, developers []developer, supportWeeks []supportWeek
 
 //check devs in support weeks exist
 // check support weeks are not overlapping, and that week are not empty
-func checkSupportWeeks(supportWeeks []supportWeek, devMap map[developerId]developer) error {
-	minWeek := day(1e6)
-	maxWeek := day(0)
+func checkSupportWeeks(supportWeeks []SupportWeek, devMap map[DeveloperId]Developer) error {
+	minWeek := Day(1e6)
+	maxWeek := Day(0)
 	for _, week := range supportWeeks {
-		if week.firstDay < minWeek {
-			minWeek = week.firstDay
+		if week.FirstDay < minWeek {
+			minWeek = week.FirstDay
 		}
 
-		if week.lastDay > maxWeek {
-			maxWeek = week.lastDay
+		if week.LastDay > maxWeek {
+			maxWeek = week.LastDay
 		}
 
-		if _, prs := devMap[week.devId]; !prs {
-			return fmt.Errorf("developer %s mentioned in support week %v does not exit", week.devId, week)
+		if _, prs := devMap[week.DevId]; !prs {
+			return fmt.Errorf("Developer %s mentioned in support week %v does not exit", week.DevId, week)
 		}
 	}
 
 	allDays := make([]bool, maxWeek-minWeek+1)
 	for _, week := range supportWeeks {
 		isEmpty := true
-		for i := week.firstDay; i < week.lastDay+1; i++ {
+		for i := week.FirstDay; i < week.LastDay+1; i++ {
 			isEmpty = false
 			if allDays[i-minWeek] {
-				return fmt.Errorf("day %d is in more than one week", i)
+				return fmt.Errorf("Day %d is in more than one week", i)
 			}
 			allDays[i-minWeek] = true
 		}
@@ -86,11 +86,11 @@ func checkSupportWeeks(supportWeeks []supportWeek, devMap map[developerId]develo
 	return nil
 }
 
-func checkDevAttributions(tasks []task, devMap map[developerId]developer) error {
+func checkDevAttributions(tasks []Task, devMap map[DeveloperId]Developer) error {
 	for _, t := range tasks {
-		for devId, _ := range t.attributions {
+		for devId, _ := range t.Attributions {
 			if _, prs := devMap[devId]; !prs {
-				return fmt.Errorf("developer %s mentioned in task %v does not exist", devId, t)
+				return fmt.Errorf("Developer %s mentioned in Task %v does not exist", devId, t)
 			}
 		}
 	}

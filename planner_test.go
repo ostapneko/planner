@@ -4,46 +4,46 @@ import "testing"
 
 func Test_checkGraph(t *testing.T) {
 	type args struct {
-		tasks        []task
-		developers   []developer
-		supportWeeks []supportWeek
-		cal          calendar
+		tasks        []Task
+		developers   []Developer
+		supportWeeks []SupportWeek
+		cal          Calendar
 	}
-	task1 := task{
-		name:         "task",
-		attributions: map[developerId]durationDays{"dev1": 3},
-	}
-
-	dev1 := developer{
-		id:    "dev1",
-		offDays: []day{},
+	task1 := Task{
+		Name:         "Task",
+		Attributions: map[DeveloperId]DurationDays{"dev1": 3},
 	}
 
-	dev2 := developer{
-		id:    "dev2",
-		offDays: []day{},
+	dev1 := Developer{
+		Id:      "dev1",
+		OffDays: []Day{},
 	}
 
-	sw1 := supportWeek{
-		firstDay: 10,
-		lastDay:  12,
-		devId: "dev1",
+	dev2 := Developer{
+		Id:      "dev2",
+		OffDays: []Day{},
 	}
 
-	sw2 := supportWeek{
-		firstDay: 13,
-		lastDay:  14,
-		devId: "dev2",
+	sw1 := SupportWeek{
+		FirstDay: 10,
+		LastDay:  12,
+		DevId:    "dev1",
 	}
 
-	invalidSw := supportWeek{
-		firstDay: 14,
-		lastDay:  13,
-		devId: "dev1",
+	sw2 := SupportWeek{
+		FirstDay: 13,
+		LastDay:  14,
+		DevId:    "dev2",
 	}
 
-	cal1 := calendar{
-		days: []day{1, 2, 3},
+	invalidSw := SupportWeek{
+		FirstDay: 14,
+		LastDay:  13,
+		DevId:    "dev1",
+	}
+
+	cal1 := Calendar{
+		Days: []Day{1, 2, 3},
 	}
 	tests := []struct {
 		name    string
@@ -53,19 +53,19 @@ func Test_checkGraph(t *testing.T) {
 		{
 			name: "valid graph",
 			args: args{
-				tasks:        []task{task1},
-				developers:   []developer{dev1},
-				supportWeeks: []supportWeek{sw1},
+				tasks:        []Task{task1},
+				developers:   []Developer{dev1},
+				supportWeeks: []SupportWeek{sw1},
 				cal:          cal1,
 			},
 			wantErr: false,
 		},
 		{
-			name: "developer missing from attributions",
+			name: "Developer missing from Attributions",
 			args: args{
-				tasks:        []task{task1},
-				developers:   []developer{dev2},
-				supportWeeks: []supportWeek{sw2},
+				tasks:        []Task{task1},
+				developers:   []Developer{dev2},
+				supportWeeks: []SupportWeek{sw2},
 				cal:          cal1,
 			},
 			wantErr: true,
@@ -73,9 +73,9 @@ func Test_checkGraph(t *testing.T) {
 		{
 			name: "support week invalid",
 			args: args{
-				tasks:        []task{task1},
-				developers:   []developer{dev1},
-				supportWeeks: []supportWeek{invalidSw},
+				tasks:        []Task{task1},
+				developers:   []Developer{dev1},
+				supportWeeks: []SupportWeek{invalidSw},
 				cal:          cal1,
 			},
 			wantErr: true,
@@ -83,9 +83,9 @@ func Test_checkGraph(t *testing.T) {
 		{
 			name: "overlapping support week",
 			args: args{
-				tasks:        []task{task1},
-				developers:   []developer{dev1},
-				supportWeeks: []supportWeek{sw1, sw1},
+				tasks:        []Task{task1},
+				developers:   []Developer{dev1},
+				supportWeeks: []SupportWeek{sw1, sw1},
 				cal:          cal1,
 			},
 			wantErr: true,
@@ -93,8 +93,8 @@ func Test_checkGraph(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := checkGraph(tt.args.tasks, tt.args.developers, tt.args.supportWeeks, tt.args.cal); (err != nil) != tt.wantErr {
-				t.Errorf("checkGraph() error = %v, wantErr %v", err, tt.wantErr)
+			if err := CheckGraph(tt.args.tasks, tt.args.developers, tt.args.supportWeeks, tt.args.cal); (err != nil) != tt.wantErr {
+				t.Errorf("CheckGraph() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}
