@@ -37,16 +37,22 @@ func checkGraph(tasks []task, developers []developer, supportWeeks []supportWeek
 		devMap[dev.id] = dev
 	}
 
-	// check devs in attributions exist
-	for _, t := range tasks {
-		for devId, _ := range t.attributions {
-			if _, prs := devMap[devId]; !prs {
-				return fmt.Errorf("developer %s mentioned in task %v does not exist", devId, t)
-			}
-		}
+	err := checkDevAttributions(tasks, devMap)
+	if err != nil {
+		return err
 	}
 
-	//check devs in support weeks exist
+	err = checkSupportWeeks(supportWeeks, devMap)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+//check devs in support weeks exist
+// check support weeks are not overlapping, and that week are not empty
+func checkSupportWeeks(supportWeeks []supportWeek, devMap map[developerId]developer) error {
 	minWeek := day(1e6)
 	maxWeek := day(0)
 	for _, week := range supportWeeks {
@@ -63,21 +69,30 @@ func checkGraph(tasks []task, developers []developer, supportWeeks []supportWeek
 		}
 	}
 
-	// check support weeks are not overlapping, and that week are not empty
-	allDays := make([]bool, maxWeek - minWeek + 1)
+	allDays := make([]bool, maxWeek-minWeek+1)
 	for _, week := range supportWeeks {
 		isEmpty := true
 		for i := week.firstDay; i < week.lastDay+1; i++ {
 			isEmpty = false
-			if allDays[i - minWeek] {
+			if allDays[i-minWeek] {
 				return fmt.Errorf("day %d is in more than one week", i)
 			}
-			allDays[i - minWeek] = true
+			allDays[i-minWeek] = true
 		}
 		if isEmpty {
 			return fmt.Errorf("support week %v is empty", week)
 		}
 	}
+	return nil
+}
 
+func checkDevAttributions(tasks []task, devMap map[developerId]developer) error {
+	for _, t := range tasks {
+		for devId, _ := range t.attributions {
+			if _, prs := devMap[devId]; !prs {
+				return fmt.Errorf("developer %s mentioned in task %v does not exist", devId, t)
+			}
+		}
+	}
 	return nil
 }
