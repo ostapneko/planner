@@ -4,6 +4,13 @@ import (
 	"fmt"
 )
 
+type Planning struct {
+	Calendar []Day
+	Developers []Developer
+	SupportWeeks []SupportWeek `yaml:"supportWeeks"`
+	Tasks []Task `yaml:"tasks"`
+}
+
 type DeveloperId string
 
 type DurationDays int
@@ -17,21 +24,17 @@ type Task struct {
 
 type Developer struct {
 	Id      DeveloperId
-	OffDays []Day
-}
-
-type Calendar struct {
-	Days []Day
+	OffDays []Day `yaml:"offDays"`
 }
 
 type SupportWeek struct {
 	FirstDay Day
 	LastDay  Day
-	DevId    DeveloperId
+	DevId    DeveloperId `yaml:"devId"`
 }
 
 // tasks are sorted in priority order: highest priority first
-func CheckGraph(tasks []Task, developers []Developer, supportWeeks []SupportWeek, cal Calendar) error {
+func CheckGraph(tasks []Task, developers []Developer, supportWeeks []SupportWeek, cal []Day) error {
 	devMap := make(map[DeveloperId]Developer, len(developers))
 	for _, dev := range developers {
 		devMap[dev.Id] = dev
@@ -65,7 +68,7 @@ func checkSupportWeeks(supportWeeks []SupportWeek, devMap map[DeveloperId]Develo
 		}
 
 		if _, prs := devMap[week.DevId]; !prs {
-			return fmt.Errorf("Developer %s mentioned in support week %v does not exit", week.DevId, week)
+			return fmt.Errorf("developer %s mentioned in support week %v does not exit", week.DevId, week)
 		}
 	}
 
@@ -75,7 +78,7 @@ func checkSupportWeeks(supportWeeks []SupportWeek, devMap map[DeveloperId]Develo
 		for i := week.FirstDay; i < week.LastDay+1; i++ {
 			isEmpty = false
 			if allDays[i-minWeek] {
-				return fmt.Errorf("Day %d is in more than one week", i)
+				return fmt.Errorf("day %d is in more than one week", i)
 			}
 			allDays[i-minWeek] = true
 		}
@@ -88,9 +91,9 @@ func checkSupportWeeks(supportWeeks []SupportWeek, devMap map[DeveloperId]Develo
 
 func checkDevAttributions(tasks []Task, devMap map[DeveloperId]Developer) error {
 	for _, t := range tasks {
-		for devId, _ := range t.Attributions {
+		for devId := range t.Attributions {
 			if _, prs := devMap[devId]; !prs {
-				return fmt.Errorf("Developer %s mentioned in Task %v does not exist", devId, t)
+				return fmt.Errorf("developer %s mentioned in Task %v does not exist", devId, t)
 			}
 		}
 	}

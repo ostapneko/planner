@@ -1,0 +1,22 @@
+calendar: [1, 2, 3, 4, 5, 6, 7]
+developers:
+  - id: riri
+    offDays: [2, 4]
+  - id: fifi
+    offDays: [1]
+supportWeeks:
+  - firstDay: 1
+    lastDay: 5
+    devId: riri
+  - firstDay: 6
+    lastDay: 7
+    devId: fifi
+tasks:
+  - name: Feature 1
+    attributions:
+      riri: 2
+      fifi: 1
+  - name: Feature 2
+    attributions:
+      riri: 1
+      fifi: 4
