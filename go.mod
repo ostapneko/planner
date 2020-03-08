@@ -1,4 +1,4 @@
-module adalongcorp.com/planner
+module github.com/ostapneko
 
 go 1.13
 
