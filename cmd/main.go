@@ -1,8 +1,8 @@
 package main
 
 import (
-	"adalongcorp.com/planner"
 	"encoding/json"
+	"github.com/ostapneko/planner"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"log"
@@ -34,6 +34,12 @@ func main() {
 
 	if err != nil {
 		log.Fatalf("error transforming planning input into planning: %s", err)
+	}
+
+	err = planner.CheckPlanning(planning)
+
+	if err != nil {
+		log.Fatalf("inconsistent planning: %s", err)
 	}
 
 	doc, _ := json.Marshal(planning)

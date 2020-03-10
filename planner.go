@@ -19,7 +19,13 @@ type Day int
 
 type Task struct {
 	Name         string
-	Attributions map[DeveloperId]DurationDays
+	Attributions map[DeveloperId]*Attribution
+}
+
+type Attribution struct {
+	DurationDays DurationDays
+	FirstDay *Day
+	LastDay  *Day
 }
 
 type Developer struct {
@@ -34,18 +40,18 @@ type SupportWeek struct {
 }
 
 // tasks are sorted in priority order: highest priority first
-func CheckGraph(tasks []*Task, developers []*Developer, supportWeeks []*SupportWeek, cal []Day) error {
-	devMap := make(map[DeveloperId]*Developer, len(developers))
-	for _, dev := range developers {
+func CheckPlanning(planning *Planning) error {
+	devMap := make(map[DeveloperId]*Developer, len(planning.Developers))
+	for _, dev := range planning.Developers {
 		devMap[dev.Id] = dev
 	}
 
-	err := checkDevAttributions(tasks, devMap)
+	err := checkDevAttributions(planning.Tasks, devMap)
 	if err != nil {
 		return err
 	}
 
-	err = checkSupportWeeks(supportWeeks, devMap)
+	err = checkSupportWeeks(planning.SupportWeeks, devMap)
 	if err != nil {
 		return err
 	}
@@ -91,9 +97,17 @@ func checkSupportWeeks(supportWeeks []*SupportWeek, devMap map[DeveloperId]*Deve
 
 func checkDevAttributions(tasks []*Task, devMap map[DeveloperId]*Developer) error {
 	for _, t := range tasks {
-		for devId := range t.Attributions {
+		for devId, attr := range t.Attributions {
 			if _, prs := devMap[devId]; !prs {
 				return fmt.Errorf("developer %s mentioned in Task %v does not exist", devId, t)
+			}
+
+			if attr.LastDay != nil && attr.FirstDay != nil && int(attr.DurationDays) != int(*attr.LastDay - *attr.FirstDay + 1) {
+				return fmt.Errorf("duration is inconsistent for attribution %+v of task %s", *attr, t.Name)
+			}
+
+			if attr.LastDay != nil && attr.FirstDay == nil {
+				return fmt.Errorf("attribution %+v of task %s has a last day but no first day", *attr, t.Name)
 			}
 		}
 	}

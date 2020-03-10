@@ -19,9 +19,16 @@ supportWeeks:
 tasks:
   - name: Feature 1
     attributions:
-      riri: 2
-      fifi: 1
+      riri:
+        duration: 10
+        firstDay: 03/04/2020
+      fifi:
+        duration: 3
   - name: Feature 2
     attributions:
-      riri: 1
-      fifi: 4
+      riri:
+        duration: 5
+        firstDay: 01/01/2020
+        lastDay: 05/01/2020
+      fifi:
+        duration: 2

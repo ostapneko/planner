@@ -1,4 +1,4 @@
-module github.com/ostapneko
+module github.com/ostapneko/planner
 
 go 1.13
 

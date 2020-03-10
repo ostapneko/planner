@@ -4,18 +4,55 @@ import "testing"
 
 func Test_checkGraph(t *testing.T) {
 	type args struct {
-		tasks        []*Task
-		developers   []*Developer
-		supportWeeks []*SupportWeek
-		cal          []Day
+		planning        *Planning
 	}
+
+	dev1Id := DeveloperId("dev1")
+
+	var day1 Day = 1
+	var day2 Day = 2
+	var day5 Day = 5
+
+	attributions1 := map[DeveloperId]*Attribution{
+		dev1Id: {
+			DurationDays: 5,
+			FirstDay:     &day1,
+			LastDay:      &day5,
+		},
+	}
+
+	attributionsWrongDuration := map[DeveloperId]*Attribution{
+		dev1Id: {
+			DurationDays: 5,
+			FirstDay:     &day2,
+			LastDay:      &day5,
+		},
+	}
+
+	attributionsOnlyLastDay := map[DeveloperId]*Attribution{
+		dev1Id: {
+			DurationDays: 5,
+			LastDay:      &day5,
+		},
+	}
+
 	task1 := &Task{
 		Name:         "Task",
-		Attributions: map[DeveloperId]DurationDays{"dev1": 3},
+		Attributions: attributions1,
+	}
+
+	taskAttributionWrongDuration := &Task{
+		Name:         "WrongTask",
+		Attributions: attributionsWrongDuration,
+	}
+
+	taskAttributionOnlyLastDay := &Task{
+		Name:         "Only Last Day",
+		Attributions: attributionsOnlyLastDay,
 	}
 
 	dev1 := &Developer{
-		Id:      "dev1",
+		Id:      dev1Id,
 		OffDays: []Day{},
 	}
 
@@ -27,7 +64,7 @@ func Test_checkGraph(t *testing.T) {
 	sw1 := &SupportWeek{
 		FirstDay: 10,
 		LastDay:  12,
-		DevId:    "dev1",
+		DevId:    dev1Id,
 	}
 
 	sw2 := &SupportWeek{
@@ -39,7 +76,7 @@ func Test_checkGraph(t *testing.T) {
 	invalidSw := &SupportWeek{
 		FirstDay: 14,
 		LastDay:  13,
-		DevId:    "dev1",
+		DevId:    dev1Id,
 	}
 
 	tests := []struct {
@@ -49,49 +86,69 @@ func Test_checkGraph(t *testing.T) {
 	}{
 		{
 			name: "valid graph",
-			args: args{
-				tasks:        []*Task{task1},
-				developers:   []*Developer{dev1},
-				supportWeeks: []*SupportWeek{sw1},
-				cal:          []Day{},
-			},
+			args: args{&Planning{
+				Tasks:        []*Task{task1},
+				Developers:   []*Developer{dev1},
+				SupportWeeks: []*SupportWeek{sw1},
+				Calendar:     []Day{},
+			}},
 			wantErr: false,
 		},
 		{
 			name: "Developer missing from Attributions",
-			args: args{
-				tasks:        []*Task{task1},
-				developers:   []*Developer{dev2},
-				supportWeeks: []*SupportWeek{sw2},
-				cal:          []Day{},
-			},
+			args: args{&Planning{
+				Tasks:        []*Task{task1},
+				Developers:   []*Developer{dev2},
+				SupportWeeks: []*SupportWeek{sw2},
+				Calendar:          []Day{},
+			}},
+			wantErr: true,
+		},
+		{
+			name: "Wrong attribution duration",
+			args: args{&Planning{
+				Tasks:        []*Task{taskAttributionWrongDuration},
+				Developers:   []*Developer{dev1},
+				SupportWeeks: []*SupportWeek{sw1},
+				Calendar:          []Day{},
+			}},
+			wantErr: true,
+		},
+		{
+			name: "Wrong attribution duration",
+			args: args{&Planning{
+				Tasks:        []*Task{taskAttributionOnlyLastDay},
+				Developers:   []*Developer{dev1},
+				SupportWeeks: []*SupportWeek{sw1},
+				Calendar:          []Day{},
+			}},
 			wantErr: true,
 		},
 		{
 			name: "support week invalid",
-			args: args{
-				tasks:        []*Task{task1},
-				developers:   []*Developer{dev1},
-				supportWeeks: []*SupportWeek{invalidSw},
-				cal:          []Day{},
-			},
+			args: args{&Planning{
+				Tasks:        []*Task{task1},
+				Developers:   []*Developer{dev1},
+				SupportWeeks: []*SupportWeek{invalidSw},
+				Calendar:          []Day{},
+			}},
 			wantErr: true,
 		},
 		{
 			name: "overlapping support week",
-			args: args{
-				tasks:        []*Task{task1},
-				developers:   []*Developer{dev1},
-				supportWeeks: []*SupportWeek{sw1, sw1},
-				cal:          []Day{},
-			},
+			args: args{&Planning{
+				Tasks:        []*Task{task1},
+				Developers:   []*Developer{dev1},
+				SupportWeeks: []*SupportWeek{sw1, sw1},
+				Calendar:          []Day{},
+			}},
 			wantErr: true,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := CheckGraph(tt.args.tasks, tt.args.developers, tt.args.supportWeeks, tt.args.cal); (err != nil) != tt.wantErr {
-				t.Errorf("CheckGraph() error = %v, wantErr %v", err, tt.wantErr)
+			if err := CheckPlanning(tt.args.planning); (err != nil) != tt.wantErr {
+				t.Errorf("CheckPlanning() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}
