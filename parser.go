@@ -3,26 +3,26 @@ package planner
 import "fmt"
 
 type PlanningInput struct {
-	Calendar []string
-	Developers []*DeveloperInput `yaml:"developers"`
+	Calendar     []string
+	Developers   []*DeveloperInput   `yaml:"developers"`
 	SupportWeeks []*SupportWeekInput `yaml:"supportWeeks"`
-	Tasks []*TaskInput `yaml:"tasks"`
+	Tasks        []*TaskInput        `yaml:"tasks"`
 }
 
 type TaskInput struct {
-	Name string
+	Name         string
 	Attributions map[DeveloperId]*AttributionInput
 }
 
 type AttributionInput struct {
 	Duration DurationDays
 	FirstDay *string `yaml:"firstDay"`
-	LastDay *string `yaml:"lastDay"`
+	LastDay  *string `yaml:"lastDay"`
 }
 
 type SupportWeekInput struct {
-	FirstDay string `yaml:"firstDay"`
-	LastDay  string `yaml:"lastDay"`
+	FirstDay string      `yaml:"firstDay"`
+	LastDay  string      `yaml:"lastDay"`
 	DevId    DeveloperId `yaml:"devId"`
 }
 
@@ -94,7 +94,7 @@ func newDeveloper(input *DeveloperInput) (*Developer, error) {
 	}, nil
 }
 
-func newSupportWeek(input *SupportWeekInput)(*SupportWeek, error) {
+func newSupportWeek(input *SupportWeekInput) (*SupportWeek, error) {
 	firstDay, err := DateToDay(input.FirstDay)
 	if err != nil {
 		return nil, err
@@ -112,7 +112,7 @@ func newSupportWeek(input *SupportWeekInput)(*SupportWeek, error) {
 	}, nil
 }
 
-func newTask(input *TaskInput)(*Task, error) {
+func newTask(input *TaskInput) (*Task, error) {
 	attrs := make(map[DeveloperId]*Attribution, len(input.Attributions))
 
 	for devId, input := range input.Attributions {
@@ -129,7 +129,7 @@ func newTask(input *TaskInput)(*Task, error) {
 	}, nil
 }
 
-func newAttribution(input *AttributionInput)(*Attribution, error) {
+func newAttribution(input *AttributionInput) (*Attribution, error) {
 	var firstDay *Day
 	var lastDay *Day
 

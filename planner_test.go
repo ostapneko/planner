@@ -4,7 +4,7 @@ import "testing"
 
 func Test_checkGraph(t *testing.T) {
 	type args struct {
-		planning        *Planning
+		planning *Planning
 	}
 
 	dev1Id := DeveloperId("dev1")
@@ -49,6 +49,12 @@ func Test_checkGraph(t *testing.T) {
 	taskAttributionOnlyLastDay := &Task{
 		Name:         "Only Last Day",
 		Attributions: attributionsOnlyLastDay,
+	}
+
+	taskLastDayNoAttribution := &Task{
+		Name:         "No attribution with last day",
+		Attributions: make(map[DeveloperId]*Attribution, 0),
+		LastDay:      &day1,
 	}
 
 	dev1 := &Developer{
@@ -100,7 +106,7 @@ func Test_checkGraph(t *testing.T) {
 				Tasks:        []*Task{task1},
 				Developers:   []*Developer{dev2},
 				SupportWeeks: []*SupportWeek{sw2},
-				Calendar:          []Day{},
+				Calendar:     []Day{},
 			}},
 			wantErr: true,
 		},
@@ -110,7 +116,7 @@ func Test_checkGraph(t *testing.T) {
 				Tasks:        []*Task{taskAttributionWrongDuration},
 				Developers:   []*Developer{dev1},
 				SupportWeeks: []*SupportWeek{sw1},
-				Calendar:          []Day{},
+				Calendar:     []Day{},
 			}},
 			wantErr: true,
 		},
@@ -120,7 +126,17 @@ func Test_checkGraph(t *testing.T) {
 				Tasks:        []*Task{taskAttributionOnlyLastDay},
 				Developers:   []*Developer{dev1},
 				SupportWeeks: []*SupportWeek{sw1},
-				Calendar:          []Day{},
+				Calendar:     []Day{},
+			}},
+			wantErr: true,
+		},
+		{
+			name: "Task last day but no attribution last day",
+			args: args{&Planning{
+				Tasks:        []*Task{taskLastDayNoAttribution},
+				Developers:   []*Developer{dev1},
+				SupportWeeks: []*SupportWeek{sw1},
+				Calendar:     []Day{},
 			}},
 			wantErr: true,
 		},
@@ -130,7 +146,7 @@ func Test_checkGraph(t *testing.T) {
 				Tasks:        []*Task{task1},
 				Developers:   []*Developer{dev1},
 				SupportWeeks: []*SupportWeek{invalidSw},
-				Calendar:          []Day{},
+				Calendar:     []Day{},
 			}},
 			wantErr: true,
 		},
@@ -140,7 +156,7 @@ func Test_checkGraph(t *testing.T) {
 				Tasks:        []*Task{task1},
 				Developers:   []*Developer{dev1},
 				SupportWeeks: []*SupportWeek{sw1, sw1},
-				Calendar:          []Day{},
+				Calendar:     []Day{},
 			}},
 			wantErr: true,
 		},

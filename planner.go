@@ -5,10 +5,10 @@ import (
 )
 
 type Planning struct {
-	Calendar []Day
-	Developers []*Developer
+	Calendar     []Day
+	Developers   []*Developer
 	SupportWeeks []*SupportWeek `yaml:"supportWeeks"`
-	Tasks []*Task `yaml:"tasks"`
+	Tasks        []*Task        `yaml:"tasks"`
 }
 
 type DeveloperId string
@@ -20,12 +20,13 @@ type Day int
 type Task struct {
 	Name         string
 	Attributions map[DeveloperId]*Attribution
+	LastDay      *Day
 }
 
 type Attribution struct {
 	DurationDays DurationDays
-	FirstDay *Day
-	LastDay  *Day
+	FirstDay     *Day
+	LastDay      *Day
 }
 
 type Developer struct {
@@ -46,7 +47,7 @@ func CheckPlanning(planning *Planning) error {
 		devMap[dev.Id] = dev
 	}
 
-	err := checkDevAttributions(planning.Tasks, devMap)
+	err := checkTasks(planning.Tasks, devMap)
 	if err != nil {
 		return err
 	}
@@ -95,20 +96,28 @@ func checkSupportWeeks(supportWeeks []*SupportWeek, devMap map[DeveloperId]*Deve
 	return nil
 }
 
-func checkDevAttributions(tasks []*Task, devMap map[DeveloperId]*Developer) error {
+func checkTasks(tasks []*Task, devMap map[DeveloperId]*Developer) error {
 	for _, t := range tasks {
+		var latestLastDay Day = 0
 		for devId, attr := range t.Attributions {
 			if _, prs := devMap[devId]; !prs {
 				return fmt.Errorf("developer %s mentioned in Task %v does not exist", devId, t)
 			}
 
-			if attr.LastDay != nil && attr.FirstDay != nil && int(attr.DurationDays) != int(*attr.LastDay - *attr.FirstDay + 1) {
+			if attr.LastDay != nil && attr.FirstDay != nil && int(attr.DurationDays) != int(*attr.LastDay-*attr.FirstDay+1) {
 				return fmt.Errorf("duration is inconsistent for attribution %+v of task %s", *attr, t.Name)
 			}
 
 			if attr.LastDay != nil && attr.FirstDay == nil {
 				return fmt.Errorf("attribution %+v of task %s has a last day but no first day", *attr, t.Name)
 			}
+
+			if attr.LastDay != nil && *attr.LastDay > latestLastDay {
+				latestLastDay = *attr.LastDay
+			}
+		}
+		if latestLastDay == 0 && t.LastDay != nil {
+			return fmt.Errorf("task has a last day but no attribution has a last day")
 		}
 	}
 	return nil
