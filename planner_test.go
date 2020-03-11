@@ -57,6 +57,13 @@ func Test_checkGraph(t *testing.T) {
 		LastDay:      &day1,
 	}
 
+	taskInconsistentLastDay := &Task{
+		Name:         "Inconsistent last day",
+		Attributions: make(map[DeveloperId]*Attribution, day2),
+		LastDay:      &day1,
+	}
+
+
 	dev1 := &Developer{
 		Id:      dev1Id,
 		OffDays: []Day{},
@@ -134,6 +141,16 @@ func Test_checkGraph(t *testing.T) {
 			name: "Task last day but no attribution last day",
 			args: args{&Planning{
 				Tasks:        []*Task{taskLastDayNoAttribution},
+				Developers:   []*Developer{dev1},
+				SupportWeeks: []*SupportWeek{sw1},
+				Calendar:     []Day{},
+			}},
+			wantErr: true,
+		},
+		{
+			name: "Inconsistent last day",
+			args: args{&Planning{
+				Tasks:        []*Task{taskInconsistentLastDay},
 				Developers:   []*Developer{dev1},
 				SupportWeeks: []*SupportWeek{sw1},
 				Calendar:     []Day{},

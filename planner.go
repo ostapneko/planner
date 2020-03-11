@@ -99,6 +99,7 @@ func checkSupportWeeks(supportWeeks []*SupportWeek, devMap map[DeveloperId]*Deve
 func checkTasks(tasks []*Task, devMap map[DeveloperId]*Developer) error {
 	for _, t := range tasks {
 		var latestLastDay Day = 0
+		var allAttributionsHaveLastDay = true
 		for devId, attr := range t.Attributions {
 			if _, prs := devMap[devId]; !prs {
 				return fmt.Errorf("developer %s mentioned in Task %v does not exist", devId, t)
@@ -115,9 +116,18 @@ func checkTasks(tasks []*Task, devMap map[DeveloperId]*Developer) error {
 			if attr.LastDay != nil && *attr.LastDay > latestLastDay {
 				latestLastDay = *attr.LastDay
 			}
+
+			if attr.LastDay == nil {
+				allAttributionsHaveLastDay = false
+			}
 		}
+
 		if latestLastDay == 0 && t.LastDay != nil {
-			return fmt.Errorf("task has a last day but no attribution has a last day")
+			return fmt.Errorf("task %s has a last day but no attribution has a last day", t.Name)
+		}
+
+		if allAttributionsHaveLastDay && t.LastDay != nil && *t.LastDay != latestLastDay {
+			return fmt.Errorf("task %s has a LastDay inconsistent with its attributions", t.Name)
 		}
 	}
 	return nil
