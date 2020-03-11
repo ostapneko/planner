@@ -13,9 +13,11 @@ func Test_checkGraph(t *testing.T) {
 	var day2 Day = 2
 	var day5 Day = 5
 
+	calendar := []Day{1, 2, 3, 4}
+
 	attributions1 := map[DeveloperId]*Attribution{
 		dev1Id: {
-			DurationDays: 5,
+			DurationDays: 4,
 			FirstDay:     &day1,
 			LastDay:      &day5,
 		},
@@ -63,10 +65,9 @@ func Test_checkGraph(t *testing.T) {
 		LastDay:      &day1,
 	}
 
-
 	dev1 := &Developer{
 		Id:      dev1Id,
-		OffDays: []Day{},
+		OffDays: []Day{3},
 	}
 
 	dev2 := &Developer{
@@ -103,7 +104,7 @@ func Test_checkGraph(t *testing.T) {
 				Tasks:        []*Task{task1},
 				Developers:   []*Developer{dev1},
 				SupportWeeks: []*SupportWeek{sw1},
-				Calendar:     []Day{},
+				Calendar:     calendar,
 			}},
 			wantErr: false,
 		},
@@ -113,7 +114,7 @@ func Test_checkGraph(t *testing.T) {
 				Tasks:        []*Task{task1},
 				Developers:   []*Developer{dev2},
 				SupportWeeks: []*SupportWeek{sw2},
-				Calendar:     []Day{},
+				Calendar:     calendar,
 			}},
 			wantErr: true,
 		},
@@ -123,7 +124,7 @@ func Test_checkGraph(t *testing.T) {
 				Tasks:        []*Task{taskAttributionWrongDuration},
 				Developers:   []*Developer{dev1},
 				SupportWeeks: []*SupportWeek{sw1},
-				Calendar:     []Day{},
+				Calendar:     calendar,
 			}},
 			wantErr: true,
 		},
@@ -133,7 +134,7 @@ func Test_checkGraph(t *testing.T) {
 				Tasks:        []*Task{taskAttributionOnlyLastDay},
 				Developers:   []*Developer{dev1},
 				SupportWeeks: []*SupportWeek{sw1},
-				Calendar:     []Day{},
+				Calendar:     calendar,
 			}},
 			wantErr: true,
 		},
@@ -143,7 +144,7 @@ func Test_checkGraph(t *testing.T) {
 				Tasks:        []*Task{taskLastDayNoAttribution},
 				Developers:   []*Developer{dev1},
 				SupportWeeks: []*SupportWeek{sw1},
-				Calendar:     []Day{},
+				Calendar:     calendar,
 			}},
 			wantErr: true,
 		},
@@ -153,7 +154,7 @@ func Test_checkGraph(t *testing.T) {
 				Tasks:        []*Task{taskInconsistentLastDay},
 				Developers:   []*Developer{dev1},
 				SupportWeeks: []*SupportWeek{sw1},
-				Calendar:     []Day{},
+				Calendar:     calendar,
 			}},
 			wantErr: true,
 		},
@@ -163,7 +164,7 @@ func Test_checkGraph(t *testing.T) {
 				Tasks:        []*Task{task1},
 				Developers:   []*Developer{dev1},
 				SupportWeeks: []*SupportWeek{invalidSw},
-				Calendar:     []Day{},
+				Calendar:     calendar,
 			}},
 			wantErr: true,
 		},
@@ -173,7 +174,7 @@ func Test_checkGraph(t *testing.T) {
 				Tasks:        []*Task{task1},
 				Developers:   []*Developer{dev1},
 				SupportWeeks: []*SupportWeek{sw1, sw1},
-				Calendar:     []Day{},
+				Calendar:     calendar,
 			}},
 			wantErr: true,
 		},

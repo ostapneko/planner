@@ -47,7 +47,12 @@ func CheckPlanning(planning *Planning) error {
 		devMap[dev.Id] = dev
 	}
 
-	err := checkTasks(planning.Tasks, devMap)
+	calendarMap := make(map[Day]interface{}, len(planning.Calendar))
+	for _, day := range planning.Calendar {
+		calendarMap[day] = nil
+	}
+
+	err := checkTasks(planning.Tasks, devMap, calendarMap)
 	if err != nil {
 		return err
 	}
@@ -96,17 +101,21 @@ func checkSupportWeeks(supportWeeks []*SupportWeek, devMap map[DeveloperId]*Deve
 	return nil
 }
 
-func checkTasks(tasks []*Task, devMap map[DeveloperId]*Developer) error {
+func checkTasks(tasks []*Task, devMap map[DeveloperId]*Developer, calendarMap map[Day]interface{}) error {
 	for _, t := range tasks {
 		var latestLastDay Day = 0
 		var allAttributionsHaveLastDay = true
 		for devId, attr := range t.Attributions {
-			if _, prs := devMap[devId]; !prs {
+			dev, devPrs := devMap[devId]
+			if !devPrs {
 				return fmt.Errorf("developer %s mentioned in Task %v does not exist", devId, t)
 			}
 
-			if attr.LastDay != nil && attr.FirstDay != nil && int(attr.DurationDays) != int(*attr.LastDay-*attr.FirstDay+1) {
-				return fmt.Errorf("duration is inconsistent for attribution %+v of task %s", *attr, t.Name)
+			if attr.LastDay != nil && attr.FirstDay != nil {
+				computedDurationDays := duration(*attr.FirstDay, *attr.LastDay, calendarMap, dev.OffDays)
+				if attr.DurationDays != computedDurationDays {
+					return fmt.Errorf("duration is inconsistent for attribution %+v of task %s. Should be %d, but got %d", *attr, t.Name, computedDurationDays, attr.DurationDays)
+				}
 			}
 
 			if attr.LastDay != nil && attr.FirstDay == nil {
@@ -131,4 +140,30 @@ func checkTasks(tasks []*Task, devMap map[DeveloperId]*Developer) error {
 		}
 	}
 	return nil
+}
+
+func duration(firstDay Day, lastDay Day, calendar map[Day]interface{}, offDays []Day) DurationDays {
+	res := 0
+	for i := firstDay; i < lastDay+1; i++ {
+		// skip days not in calendar
+		if _, prs := calendar[i]; !prs {
+			continue
+		}
+
+		// skip off days
+		for _, d := range offDays {
+			isOffDay := false
+			if d == i {
+				isOffDay = true
+			}
+
+			if isOffDay {
+				continue
+			}
+		}
+
+		res++
+	}
+
+	return DurationDays(res)
 }
