@@ -52,7 +52,7 @@ func CheckPlanning(planning *Planning) error {
 		calendarMap[day] = nil
 	}
 
-	err := checkTasks(planning.Tasks, devMap, calendarMap)
+	err := checkTasks(planning.Tasks, devMap, calendarMap, planning.SupportWeeks)
 	if err != nil {
 		return err
 	}
@@ -101,7 +101,7 @@ func checkSupportWeeks(supportWeeks []*SupportWeek, devMap map[DeveloperId]*Deve
 	return nil
 }
 
-func checkTasks(tasks []*Task, devMap map[DeveloperId]*Developer, calendarMap map[Day]interface{}) error {
+func checkTasks(tasks []*Task, devMap map[DeveloperId]*Developer, calendarMap map[Day]interface{}, supportWeeks []*SupportWeek) error {
 	for _, t := range tasks {
 		var latestLastDay Day = 0
 		var allAttributionsHaveLastDay = true
@@ -111,8 +111,16 @@ func checkTasks(tasks []*Task, devMap map[DeveloperId]*Developer, calendarMap ma
 				return fmt.Errorf("developer %s mentioned in Task %v does not exist", devId, t)
 			}
 
+			devSupportWeeks := make([]*SupportWeek, 0)
+			for _, w := range supportWeeks {
+				if w.DevId == devId {
+					devSupportWeeks = append(devSupportWeeks, w)
+				}
+			}
+
+
 			if attr.LastDay != nil && attr.FirstDay != nil {
-				computedDurationDays := duration(*attr.FirstDay, *attr.LastDay, calendarMap, dev.OffDays)
+				computedDurationDays := duration(*attr.FirstDay, *attr.LastDay, calendarMap, dev.OffDays, devSupportWeeks)
 				if attr.DurationDays != computedDurationDays {
 					return fmt.Errorf("duration is inconsistent for attribution %+v of task %s. Should be %d, but got %d", *attr, t.Name, computedDurationDays, attr.DurationDays)
 				}
@@ -142,7 +150,7 @@ func checkTasks(tasks []*Task, devMap map[DeveloperId]*Developer, calendarMap ma
 	return nil
 }
 
-func duration(firstDay Day, lastDay Day, calendar map[Day]interface{}, offDays []Day) DurationDays {
+func duration(firstDay Day, lastDay Day, calendar map[Day]interface{}, offDays []Day, weeks []*SupportWeek) DurationDays {
 	res := 0
 	for i := firstDay; i < lastDay+1; i++ {
 		// skip days not in calendar
@@ -151,15 +159,27 @@ func duration(firstDay Day, lastDay Day, calendar map[Day]interface{}, offDays [
 		}
 
 		// skip off days
+		isOffDay := false
 		for _, d := range offDays {
-			isOffDay := false
 			if d == i {
 				isOffDay = true
 			}
+		}
 
-			if isOffDay {
-				continue
+		if isOffDay {
+			continue
+		}
+
+		// skip support days
+		isSupportDay := false
+		for _, w := range weeks {
+			if i >= w.FirstDay && i <= w.LastDay {
+				isSupportDay = true
 			}
+		}
+
+		if isSupportDay {
+			continue
 		}
 
 		res++

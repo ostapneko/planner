@@ -17,7 +17,7 @@ func Test_checkGraph(t *testing.T) {
 
 	attributions1 := map[DeveloperId]*Attribution{
 		dev1Id: {
-			DurationDays: 4,
+			DurationDays: 2,
 			FirstDay:     &day1,
 			LastDay:      &day5,
 		},
@@ -76,8 +76,8 @@ func Test_checkGraph(t *testing.T) {
 	}
 
 	sw1 := &SupportWeek{
-		FirstDay: 10,
-		LastDay:  12,
+		FirstDay: 2,
+		LastDay:  2,
 		DevId:    dev1Id,
 	}
 
