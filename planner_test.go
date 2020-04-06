@@ -2,7 +2,7 @@ package planner
 
 import "testing"
 
-func Test_checkGraph(t *testing.T) {
+func Test_checkPlanning(t *testing.T) {
 	type args struct {
 		planning *Planning
 	}

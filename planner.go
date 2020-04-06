@@ -8,6 +8,7 @@ type Planning struct {
 	Calendar     []Day
 	Developers   []*Developer
 	SupportWeeks []*SupportWeek `yaml:"supportWeeks"`
+	// tasks are sorted in priority order: highest priority first
 	Tasks        []*Task        `yaml:"tasks"`
 }
 
@@ -40,7 +41,6 @@ type SupportWeek struct {
 	DevId    DeveloperId `yaml:"devId"`
 }
 
-// tasks are sorted in priority order: highest priority first
 func CheckPlanning(planning *Planning) error {
 	devMap := make(map[DeveloperId]*Developer, len(planning.Developers))
 	for _, dev := range planning.Developers {
