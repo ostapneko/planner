@@ -15,7 +15,7 @@ type TaskInput struct {
 }
 
 type AttributionInput struct {
-	Duration DurationDays
+	Effort   EffortDays
 	FirstDay *string `yaml:"firstDay"`
 	LastDay  *string `yaml:"lastDay"`
 }
@@ -150,8 +150,8 @@ func newAttribution(input *AttributionInput) (*Attribution, error) {
 	}
 
 	return &Attribution{
-		DurationDays: input.Duration,
-		FirstDay:     firstDay,
-		LastDay:      lastDay,
+		EffortDays: input.Effort,
+		FirstDay:   firstDay,
+		LastDay:    lastDay,
 	}, nil
 }

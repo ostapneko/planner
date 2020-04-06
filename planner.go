@@ -13,7 +13,7 @@ type Planning struct {
 
 type DeveloperId string
 
-type DurationDays int
+type EffortDays int
 
 type Day int
 
@@ -24,9 +24,9 @@ type Task struct {
 }
 
 type Attribution struct {
-	DurationDays DurationDays
-	FirstDay     *Day
-	LastDay      *Day
+	EffortDays EffortDays
+	FirstDay   *Day
+	LastDay    *Day
 }
 
 type Developer struct {
@@ -66,7 +66,7 @@ func CheckPlanning(planning *Planning) error {
 }
 
 //check devs in support weeks exist
-// check support weeks are not overlapping, and that week are not empty
+// check support weeks are not overlapping, and that weeks are not empty
 func checkSupportWeeks(supportWeeks []*SupportWeek, devMap map[DeveloperId]*Developer) error {
 	minWeek := Day(1e6)
 	maxWeek := Day(0)
@@ -118,11 +118,10 @@ func checkTasks(tasks []*Task, devMap map[DeveloperId]*Developer, calendarMap ma
 				}
 			}
 
-
 			if attr.LastDay != nil && attr.FirstDay != nil {
-				computedDurationDays := duration(*attr.FirstDay, *attr.LastDay, calendarMap, dev.OffDays, devSupportWeeks)
-				if attr.DurationDays != computedDurationDays {
-					return fmt.Errorf("duration is inconsistent for attribution %+v of task %s. Should be %d, but got %d", *attr, t.Name, computedDurationDays, attr.DurationDays)
+				computedEffortDays := effort(*attr.FirstDay, *attr.LastDay, calendarMap, dev.OffDays, devSupportWeeks)
+				if attr.EffortDays != computedEffortDays {
+					return fmt.Errorf("effort is inconsistent for attribution %+v of task %s. Should be %d, but got %d", *attr, t.Name, computedEffortDays, attr.EffortDays)
 				}
 			}
 
@@ -150,7 +149,7 @@ func checkTasks(tasks []*Task, devMap map[DeveloperId]*Developer, calendarMap ma
 	return nil
 }
 
-func duration(firstDay Day, lastDay Day, calendar map[Day]interface{}, offDays []Day, weeks []*SupportWeek) DurationDays {
+func effort(firstDay Day, lastDay Day, calendar map[Day]interface{}, offDays []Day, weeks []*SupportWeek) EffortDays {
 	res := 0
 	for i := firstDay; i < lastDay+1; i++ {
 		// skip days not in calendar
@@ -185,5 +184,5 @@ func duration(firstDay Day, lastDay Day, calendar map[Day]interface{}, offDays [
 		res++
 	}
 
-	return DurationDays(res)
+	return EffortDays(res)
 }

@@ -17,24 +17,24 @@ func Test_checkGraph(t *testing.T) {
 
 	attributions1 := map[DeveloperId]*Attribution{
 		dev1Id: {
-			DurationDays: 2,
-			FirstDay:     &day1,
-			LastDay:      &day5,
+			EffortDays: 2,
+			FirstDay:   &day1,
+			LastDay:    &day5,
 		},
 	}
 
-	attributionsWrongDuration := map[DeveloperId]*Attribution{
+	attributionsWrongEffort := map[DeveloperId]*Attribution{
 		dev1Id: {
-			DurationDays: 5,
-			FirstDay:     &day2,
-			LastDay:      &day5,
+			EffortDays: 5,
+			FirstDay:   &day2,
+			LastDay:    &day5,
 		},
 	}
 
 	attributionsOnlyLastDay := map[DeveloperId]*Attribution{
 		dev1Id: {
-			DurationDays: 5,
-			LastDay:      &day5,
+			EffortDays: 5,
+			LastDay:    &day5,
 		},
 	}
 
@@ -43,9 +43,9 @@ func Test_checkGraph(t *testing.T) {
 		Attributions: attributions1,
 	}
 
-	taskAttributionWrongDuration := &Task{
+	taskAttributionWrongEffort := &Task{
 		Name:         "WrongTask",
-		Attributions: attributionsWrongDuration,
+		Attributions: attributionsWrongEffort,
 	}
 
 	taskAttributionOnlyLastDay := &Task{
@@ -119,9 +119,9 @@ func Test_checkGraph(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name: "Wrong attribution duration",
+			name: "Wrong attribution effort",
 			args: args{&Planning{
-				Tasks:        []*Task{taskAttributionWrongDuration},
+				Tasks:        []*Task{taskAttributionWrongEffort},
 				Developers:   []*Developer{dev1},
 				SupportWeeks: []*SupportWeek{sw1},
 				Calendar:     calendar,
@@ -129,7 +129,7 @@ func Test_checkGraph(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name: "Wrong attribution duration",
+			name: "Wrong attribution effort",
 			args: args{&Planning{
 				Tasks:        []*Task{taskAttributionOnlyLastDay},
 				Developers:   []*Developer{dev1},
