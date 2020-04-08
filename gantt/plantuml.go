@@ -10,7 +10,11 @@ import (
 func ToPlantUML(planning *planner.Planning) string {
 	var b strings.Builder
 
-	b.WriteString("@startgantt\nprintscale daily\n")
+	b.WriteString("@startgantt\nprintscale daily\nsaturday are closed\nsunday are closed\n")
+
+	for _, holiday := range planning.Holidays {
+		b.WriteString(fmt.Sprintf("%s is closed\n", dayToPlantUMLDate(holiday)))
+	}
 
 	startDay := planning.StartDay
 
