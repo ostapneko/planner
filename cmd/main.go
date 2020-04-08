@@ -50,7 +50,8 @@ func main() {
 
 	planner.ForecastCompletion(planning, now)
 
-	doc, _ := yaml.Marshal(planning)
+	planningOutput := planner.NewPlanningInput(planning)
+	doc, _ := yaml.Marshal(planningOutput)
 
 	fmt.Println(string(doc))
 }

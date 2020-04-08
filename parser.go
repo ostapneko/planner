@@ -155,3 +155,72 @@ func newAttribution(input *AttributionInput) (*Attribution, error) {
 		LastDay:    lastDay,
 	}, nil
 }
+
+func NewPlanningInput(planning *Planning) *PlanningInput {
+	cal := make([]string, len(planning.Calendar))
+	for i, day := range planning.Calendar {
+		cal[i] = DayToDate(day)
+	}
+
+	developers := make([]*DeveloperInput, len(planning.Developers))
+	for i, developer := range planning.Developers {
+		offDays := make([]string, developer.OffDays.Len())
+		for j, day := range developer.OffDays {
+			offDays[j] = DayToDate(day)
+		}
+
+		developers[i] = &DeveloperInput{
+			Id:      developer.Id,
+			OffDays: offDays,
+		}
+	}
+
+	supportWeeks := make([]*SupportWeekInput, len(planning.SupportWeeks))
+	for i, week := range planning.SupportWeeks {
+		supportWeeks[i] = &SupportWeekInput{
+			FirstDay: DayToDate(week.FirstDay),
+			LastDay:  DayToDate(week.LastDay),
+			DevId:    week.DevId,
+		}
+	}
+
+	tasks := make([]*TaskInput, len(planning.Tasks))
+	for i, task := range planning.Tasks {
+		attributions := make(map[DeveloperId]*AttributionInput)
+		for developerId, attribution := range task.Attributions {
+			attributions[developerId] = newAttributionInput(attribution)
+		}
+
+		tasks[i] = &TaskInput{
+			Name:         task.Name,
+			Attributions: attributions,
+		}
+	}
+
+	return &PlanningInput{
+		Calendar:     cal,
+		Developers:   developers,
+		SupportWeeks: supportWeeks,
+		Tasks:        tasks,
+	}
+}
+
+func newAttributionInput(attr *Attribution) *AttributionInput {
+	var firstDay *string
+	if attr.FirstDay != nil {
+		date := DayToDate(*attr.FirstDay)
+		firstDay = &date
+	}
+
+	var lastDay *string
+	if attr.LastDay != nil {
+		date := DayToDate(*attr.LastDay)
+		lastDay = &date
+	}
+
+	return &AttributionInput{
+		Effort:   attr.EffortDays,
+		FirstDay: firstDay,
+		LastDay:  lastDay,
+	}
+}
