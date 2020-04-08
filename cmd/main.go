@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/ostapneko/planner"
+	"github.com/ostapneko/planner/gantt"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"log"
@@ -50,8 +51,10 @@ func main() {
 
 	planner.ForecastCompletion(planning, now)
 
-	planningOutput := planner.NewPlanningInput(planning)
-	doc, _ := yaml.Marshal(planningOutput)
+	//planningOutput := planner.NewPlanningInput(planning)
+	//doc, _ := yaml.Marshal(planningOutput)
+
+	doc := gantt.ToPlantUML(planning)
 
 	fmt.Println(string(doc))
 }
