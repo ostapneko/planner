@@ -8,7 +8,6 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
-	"time"
 )
 
 func main() {
@@ -44,12 +43,7 @@ func main() {
 		log.Fatalf("inconsistent planning: %s", err)
 	}
 
-	now, err := planner.DateToDay(time.Now().Format("02/01/2006"))
-	if err != nil {
-		log.Fatalf("could not parse date, something is seriously wrong: %s", err)
-	}
-
-	planner.ForecastCompletion(planning, now)
+	planner.ForecastCompletion(planning)
 
 	//planningOutput := planner.NewPlanningInput(planning)
 	//doc, _ := yaml.Marshal(planningOutput)

@@ -23,7 +23,11 @@ func DateToDay(str string) (Day, error) {
 
 // from  18307 (nb of days since epoch) -> 15/02/2020
 func DayToDate(day Day) string {
-	epoch := time.Unix(0, 0)
-	t := epoch.Add(time.Duration(int(day)) * time.Hour * 24)
+	t := DayToTime(day)
 	return t.Format(dateFormat)
+}
+
+func DayToTime(day Day) time.Time {
+	epoch := time.Unix(0, 0)
+	return epoch.Add(time.Duration(int(day)) * time.Hour * 24)
 }

@@ -15,7 +15,7 @@ func Test_checkPlanning(t *testing.T) {
 	var day2 Day = 2
 	var day5 Day = 5
 
-	calendar := []Day{1, 2, 3, 4}
+	holidays := []Day{3, 4}
 
 	attributions1 := map[DeveloperId]*Attribution{
 		dev1Id: {
@@ -106,7 +106,7 @@ func Test_checkPlanning(t *testing.T) {
 				Tasks:        []*Task{task1},
 				Developers:   []*Developer{dev1},
 				SupportWeeks: []*SupportWeek{sw1},
-				Calendar:     calendar,
+				Holidays:     holidays,
 			}},
 			wantErr: false,
 		},
@@ -116,7 +116,7 @@ func Test_checkPlanning(t *testing.T) {
 				Tasks:        []*Task{task1},
 				Developers:   []*Developer{dev2},
 				SupportWeeks: []*SupportWeek{sw2},
-				Calendar:     calendar,
+				Holidays:     holidays,
 			}},
 			wantErr: true,
 		},
@@ -126,7 +126,7 @@ func Test_checkPlanning(t *testing.T) {
 				Tasks:        []*Task{taskAttributionWrongEffort},
 				Developers:   []*Developer{dev1},
 				SupportWeeks: []*SupportWeek{sw1},
-				Calendar:     calendar,
+				Holidays:     holidays,
 			}},
 			wantErr: true,
 		},
@@ -136,7 +136,7 @@ func Test_checkPlanning(t *testing.T) {
 				Tasks:        []*Task{taskAttributionOnlyLastDay},
 				Developers:   []*Developer{dev1},
 				SupportWeeks: []*SupportWeek{sw1},
-				Calendar:     calendar,
+				Holidays:     holidays,
 			}},
 			wantErr: true,
 		},
@@ -146,7 +146,7 @@ func Test_checkPlanning(t *testing.T) {
 				Tasks:        []*Task{taskLastDayNoAttribution},
 				Developers:   []*Developer{dev1},
 				SupportWeeks: []*SupportWeek{sw1},
-				Calendar:     calendar,
+				Holidays:     holidays,
 			}},
 			wantErr: true,
 		},
@@ -156,7 +156,7 @@ func Test_checkPlanning(t *testing.T) {
 				Tasks:        []*Task{taskInconsistentLastDay},
 				Developers:   []*Developer{dev1},
 				SupportWeeks: []*SupportWeek{sw1},
-				Calendar:     calendar,
+				Holidays:     holidays,
 			}},
 			wantErr: true,
 		},
@@ -166,7 +166,7 @@ func Test_checkPlanning(t *testing.T) {
 				Tasks:        []*Task{task1},
 				Developers:   []*Developer{dev1},
 				SupportWeeks: []*SupportWeek{invalidSw},
-				Calendar:     calendar,
+				Holidays:     holidays,
 			}},
 			wantErr: true,
 		},
@@ -176,7 +176,7 @@ func Test_checkPlanning(t *testing.T) {
 				Tasks:        []*Task{task1},
 				Developers:   []*Developer{dev1},
 				SupportWeeks: []*SupportWeek{sw1, sw1},
-				Calendar:     calendar,
+				Holidays:     holidays,
 			}},
 			wantErr: true,
 		},
@@ -217,7 +217,8 @@ func TestForecastCompletion(t *testing.T) {
 		},
 	}
 	planning := &Planning{
-		Calendar: []Day{1, 2, 3, 4, 5, 6, 7, 8, 9, 10},
+		StartDay: 1,
+		Holidays: []Day{9, 10},
 		Developers: []*Developer{
 			{
 				Id:      "dev1",
@@ -242,57 +243,53 @@ func TestForecastCompletion(t *testing.T) {
 		},
 	}
 
-	ForecastCompletion(planning, 1)
+	ForecastCompletion(planning)
 
+	// start day: 1
+	// holidays: 9, 10
+	// support week: dev1 @ 7, 8
+	// dev1 off days: 1
+	// dev2 off days: 2
+	// saturdays  + sundays: 2, 3, 9, 10, 16, 17
 	// task1:
-	// dev1: 2, 3, 4
-	// dev2: 1, 3
-	// first day: 1
-	// last day: 4
+	// dev1 (3d) : 4, 5, 6
+	// dev2 (2d): 1, 4
+	// last day: 5
 	// task2:
-	// dev1: 5, 6, 9
-	// dev2: 4, 5
-	// first day: 4
-	// last day: 9
+	// dev1 (3d): 11, 12, 13
+	// dev2 (2d): 5, 6
+	// last day: 12
 	// task3:
-	// dev1: 10
-	// first day: 10
-	// last day: 10
-	// dev2: 6, 7, 8, 9, 10 (cannot be completed)
-	// first day: 6
-	// last day: 10
+	// dev1 (1d): 14
+	// dev2 (10d): 7, 8, 11, 12, 13, 14, 15, 18, 19, 20
+	// last day: 20
 
-	examples := map[Day]Day{
-		*task1.Attributions["dev1"].FirstDay: 2,
-		*task1.Attributions["dev1"].LastDay:  4,
-		*task1.Attributions["dev2"].FirstDay: 1,
-		*task1.Attributions["dev2"].LastDay:  3,
-		*task1.LastDay:                       4,
-		*task2.Attributions["dev1"].FirstDay: 5,
-		*task2.Attributions["dev1"].LastDay:  9,
-		*task2.Attributions["dev2"].FirstDay: 4,
-		*task2.Attributions["dev2"].LastDay:  5,
-		*task2.LastDay:                       9,
-		*task3.Attributions["dev1"].FirstDay: 10,
-		*task3.Attributions["dev1"].LastDay:  10,
-		*task3.Attributions["dev2"].FirstDay: 6,
+	examples := []struct {
+		act Day
+		exp Day
+	}{
+		{act: *task1.Attributions["dev1"].FirstDay, exp: 4},
+		{act: *task1.Attributions["dev1"].LastDay, exp: 6},
+		{act: *task1.Attributions["dev2"].FirstDay, exp: 1},
+		{act: *task1.Attributions["dev2"].LastDay, exp: 4},
+		{act: *task1.LastDay, exp: 6},
+		{act: *task2.Attributions["dev1"].FirstDay, exp: 11},
+		{act: *task2.Attributions["dev1"].LastDay, exp: 13},
+		{act: *task2.Attributions["dev2"].FirstDay, exp: 5},
+		{act: *task2.Attributions["dev2"].LastDay, exp: 6},
+		{act: *task2.LastDay, exp: 13},
+		{act: *task3.Attributions["dev1"].FirstDay, exp: 14},
+		{act: *task3.Attributions["dev1"].LastDay, exp: 14},
+		{act: *task3.Attributions["dev2"].FirstDay, exp: 7},
+		{act: *task3.Attributions["dev2"].LastDay, exp: 20},
+		{act: *task3.LastDay, exp: 20},
 	}
 
-	i := 0
-	for act, exp := range examples {
-		i++
-		if act != exp {
-			t.Errorf("exp %d, got %d", exp, act)
+	for i, example := range examples {
+		if example.act != example.exp {
+			t.Errorf("exp %d, got %d in example %d", example.exp, example.act, i + 1)
 		} else {
 			t.Logf("pass example %d", i)
 		}
-	}
-
-	if task3.Attributions["dev2"].LastDay != nil {
-		t.Errorf("expected task3 attr2's last day to be nil, but found %d", *task3.Attributions["dev2"].LastDay)
-	}
-
-	if task3.LastDay != nil {
-		t.Errorf("expected task3's last day to be nil but found %d", *task3.LastDay)
 	}
 }

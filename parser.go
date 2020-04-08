@@ -3,7 +3,8 @@ package planner
 import "fmt"
 
 type PlanningInput struct {
-	Calendar     []string
+	StartDay     string `yaml:"startDay"`
+	Holidays     []string
 	Developers   []*DeveloperInput   `yaml:"developers"`
 	SupportWeeks []*SupportWeekInput `yaml:"supportWeeks"`
 	Tasks        []*TaskInput        `yaml:"tasks"`
@@ -32,13 +33,13 @@ type DeveloperInput struct {
 }
 
 func NewPlanning(input PlanningInput) (*Planning, error) {
-	cal := make([]Day, len(input.Calendar))
-	for i, s := range input.Calendar {
+	holidays := make([]Day, len(input.Holidays))
+	for i, s := range input.Holidays {
 		d, err := DateToDay(s)
 		if err != nil {
 			return nil, fmt.Errorf("error parsing cal %s", err)
 		}
-		cal[i] = d
+		holidays[i] = d
 	}
 
 	devs := make([]*Developer, len(input.Developers))
@@ -69,8 +70,14 @@ func NewPlanning(input PlanningInput) (*Planning, error) {
 		tasks[i] = task
 	}
 
+	startDay, err := DateToDay(input.StartDay)
+	if err != nil {
+		return nil, fmt.Errorf("error parsing start day: %s", err)
+	}
+
 	return &Planning{
-		Calendar:     cal,
+		StartDay:     startDay,
+		Holidays:     holidays,
 		Developers:   devs,
 		SupportWeeks: weeks,
 		Tasks:        tasks,
@@ -157,9 +164,9 @@ func newAttribution(input *AttributionInput) (*Attribution, error) {
 }
 
 func NewPlanningInput(planning *Planning) *PlanningInput {
-	cal := make([]string, len(planning.Calendar))
-	for i, day := range planning.Calendar {
-		cal[i] = DayToDate(day)
+	holidays := make([]string, len(planning.Holidays))
+	for i, day := range planning.Holidays {
+		holidays[i] = DayToDate(day)
 	}
 
 	developers := make([]*DeveloperInput, len(planning.Developers))
@@ -198,7 +205,8 @@ func NewPlanningInput(planning *Planning) *PlanningInput {
 	}
 
 	return &PlanningInput{
-		Calendar:     cal,
+		StartDay:     DayToDate(planning.StartDay),
+		Holidays:     holidays,
 		Developers:   developers,
 		SupportWeeks: supportWeeks,
 		Tasks:        tasks,

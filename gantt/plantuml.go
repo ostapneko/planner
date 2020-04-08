@@ -12,17 +12,9 @@ func ToPlantUML(planning *planner.Planning) string {
 
 	b.WriteString("@startgantt\nprintscale daily\n")
 
-	firstDay, _ := planner.DateToDay("01/01/3000")
+	startDay := planning.StartDay
 
-	for _, task := range planning.Tasks {
-		for _, attribution := range task.Attributions {
-			if attribution.FirstDay != nil && *attribution.FirstDay < firstDay {
-				firstDay = *attribution.FirstDay
-			}
-		}
-	}
-
-	b.WriteString(fmt.Sprintf("Project starts on %s\n", dayToPlantUMLDate(firstDay)))
+	b.WriteString(fmt.Sprintf("Project starts on %s\n", dayToPlantUMLDate(startDay)))
 
 	for _, task := range planning.Tasks {
 		for developerId, attribution := range task.Attributions {

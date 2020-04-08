@@ -2,11 +2,12 @@ package planner
 
 import (
 	"fmt"
-	"sort"
+	"time"
 )
 
 type Planning struct {
-	Calendar     Days
+	StartDay     Day
+	Holidays     Days
 	Developers   []*Developer
 	SupportWeeks []*SupportWeek `yaml:"supportWeeks"`
 	// tasks are sorted in priority order: highest priority first
@@ -61,12 +62,12 @@ func CheckPlanning(planning *Planning) error {
 		devMap[dev.Id] = dev
 	}
 
-	calendarMap := make(map[Day]interface{}, len(planning.Calendar))
-	for _, day := range planning.Calendar {
-		calendarMap[day] = nil
+	holidaysMap := make(map[Day]interface{}, len(planning.Holidays))
+	for _, day := range planning.Holidays {
+		holidaysMap[day] = nil
 	}
 
-	err := checkTasks(planning.Tasks, devMap, calendarMap, planning.SupportWeeks)
+	err := checkTasks(planning.Tasks, devMap, holidaysMap, planning.SupportWeeks)
 	if err != nil {
 		return err
 	}
@@ -79,91 +80,84 @@ func CheckPlanning(planning *Planning) error {
 	return nil
 }
 
-func ForecastCompletion(planning *Planning, now Day) {
-	devToDays := make(map[DeveloperId][]Day)
+// ForecastCompletion attributes a FirstDay and a LastDay to all attributions,
+// as well as a last day to all tasks
+func ForecastCompletion(planning *Planning) {
+	// This maps developers to all their non-worked days
+	devToOffDays := make(map[DeveloperId]map[Day]bool)
+
+	// fill the map with empty maps
 	for _, developer := range planning.Developers {
-		devToDays[developer.Id] = availableDays(developer, planning.Calendar, planning.SupportWeeks, now)
+		devToOffDays[developer.Id] = make(map[Day]bool)
+	}
+
+	// holidays
+	for _, holiday := range planning.Holidays {
+		for _, developer := range planning.Developers {
+			devToOffDays[developer.Id][holiday] = true
+		}
+	}
+
+	// off days
+	for _, developer := range planning.Developers {
+		for _, day := range developer.OffDays {
+			devToOffDays[developer.Id][day] = true
+		}
+	}
+
+	// support weeks
+	for _, week := range planning.SupportWeeks {
+		for i := week.FirstDay; i <= week.LastDay; i++ {
+			devToOffDays[week.DevId][i] = true
+		}
+	}
+
+
+	// devToLatestDay associate a the latest day that was allocated for each developer
+	// as we go through each task and each attribution by order of priority, we are going to increment this day
+	// until we find a non-holiday, non-off-day, non-support-week-day, non-week ends for this developer, and repeat until
+	// all the effort days for all attributions have been fullfilled
+	devToLatestDay := make(map[DeveloperId]Day)
+
+	for _, developer := range planning.Developers {
+		devToLatestDay[developer.Id] = planning.StartDay
 	}
 
 	for _, task := range planning.Tasks {
-		// skip finished tasks
-		if task.LastDay != nil && *task.LastDay < now {
-			continue
-		}
-
-		// for each attribution, add days from allocatable developer days
-		// until those days are equal to the attribution's effort day, or until we run out
-		// along the way, we bump the last attribution day and assign it to the attributions in case there
-		// is enough allocated days to fulfill the attribution
+		var lastTaskDay *Day
+		task.LastDay = nil
 		for developerId, attribution := range task.Attributions {
-			var attributedEffort EffortDays = 0
+			attribution.FirstDay = nil
+			attribution.LastDay = nil
+			var effort EffortDays = 0
+			for effort < attribution.EffortDays {
+				day := devToLatestDay[developerId]
+				// if the day is not off, increment the effort
+				if _, prs := devToOffDays[developerId][day]; !prs && !isWeekEnd(day) {
+					effort++
+					// if the first day is not set, set it
+					if attribution.FirstDay == nil {
+						firstDay := devToLatestDay[developerId]
+						attribution.FirstDay = &firstDay
+					}
+				}
 
-			var lastAttrDay *Day
-			if len(devToDays[developerId]) > 0 {
-				attribution.FirstDay = &devToDays[developerId][0]
+				devToLatestDay[developerId] = day + 1
 			}
+			attrLastDay := devToLatestDay[developerId] - 1
+			attribution.LastDay = &attrLastDay
 
-			for len(devToDays[developerId]) > 0 && attributedEffort < attribution.EffortDays {
-				// pop the earliest day
-				lastAttrDay = &devToDays[developerId][0]
-				devToDays[developerId] = devToDays[developerId][1:]
-				attributedEffort += 1
-			}
-
-			if attributedEffort == attribution.EffortDays {
-				attribution.LastDay = lastAttrDay
-			}
-
-		}
-
-		// if all attributions are fulfilled, update the task's last day
-		var lastDay *Day
-		allAttrAreFulfilled := true
-		for _, attribution := range task.Attributions {
-			if attribution.LastDay == nil {
-				allAttrAreFulfilled = false
-				break
-			}
-
-			if lastDay == nil || *attribution.LastDay > *lastDay {
-				lastDay = attribution.LastDay
+			if lastTaskDay == nil || attrLastDay > *lastTaskDay {
+				lastTaskDay = &attrLastDay
 			}
 		}
-
-		if allAttrAreFulfilled {
-			task.LastDay = lastDay
-		}
+		task.LastDay = lastTaskDay
 	}
 }
 
-func availableDays(dev *Developer, cal Days, weeks []*SupportWeek, now Day) []Day {
-	res := make(Days, 0)
-	offDays := map[Day]bool{}
-	for _, day := range dev.OffDays {
-		offDays[day] = true
-	}
-	supportDays := supportWeekDays(weeks)
-
-	for _, day := range cal {
-		_, isOff := offDays[day]
-		_, isSupport := supportDays[day]
-		isInFuture := day >= now
-		if !isOff && !isSupport && isInFuture {
-			res = append(res, day)
-		}
-	}
-	sort.Sort(res)
-	return res
-}
-
-func supportWeekDays(weeks []*SupportWeek) map[Day]bool {
-	res := map[Day]bool{}
-	for _, week := range weeks {
-		for i := week.FirstDay; i <= week.LastDay; i++ {
-			res[i] = true
-		}
-	}
-	return res
+func isWeekEnd(day Day) bool {
+	weekDay := DayToTime(day).Weekday()
+	return weekDay == time.Saturday || weekDay == time.Sunday
 }
 
 // check devs in support weeks exist
@@ -250,11 +244,11 @@ func checkTasks(tasks []*Task, devMap map[DeveloperId]*Developer, calendarMap ma
 	return nil
 }
 
-func effort(firstDay Day, lastDay Day, calendar map[Day]interface{}, offDays []Day, weeks []*SupportWeek) EffortDays {
+func effort(firstDay Day, lastDay Day, holidays map[Day]interface{}, offDays []Day, weeks []*SupportWeek) EffortDays {
 	res := 0
 	for i := firstDay; i < lastDay+1; i++ {
-		// skip days not in calendar
-		if _, prs := calendar[i]; !prs {
+		// skip holidays not in calendar
+		if _, prs := holidays[i]; prs {
 			continue
 		}
 
