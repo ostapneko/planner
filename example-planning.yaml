@@ -1,34 +1,46 @@
 calendar:
-  - 01/01/2020
-  - 02/01/2020
-  - 04/01/2020
+  - 01/01/2021
+  - 02/01/2021
+  - 04/01/2021
+  - 05/01/2021
+  - 06/01/2021
+  - 07/01/2021
+  - 08/01/2021
+  - 09/01/2021
+  - 11/01/2021
+  - 12/01/2021
+  - 14/01/2021
+  - 15/01/2021
+  - 16/01/2021
+  - 17/01/2021
+  - 18/01/2021
+  - 19/01/2021
 developers:
   - id: riri
     offDays:
-      - 01/01/2020
+      - 01/01/2021
   - id: fifi
     offDays:
-      - 02/01/2020
+      - 02/01/2021
 supportWeeks:
-  - firstDay: 01/01/2020
-    lastDay: 07/01/2020
+  - firstDay: 01/01/2021
+    lastDay: 07/01/2021
     devId: riri
-  - firstDay: 08/01/2020
-    lastDay: 15/01/2020
+  - firstDay: 08/01/2021
+    lastDay: 15/01/2021
     devId: fifi
 tasks:
   - name: Feature 1
     attributions:
       riri:
-        duration: 10
-        firstDay: 03/04/2020
+        effort: 2
+        firstDay: 03/04/2021
       fifi:
-        duration: 3
+        effort: 3
   - name: Feature 2
     attributions:
       riri:
-        duration: 5
-        firstDay: 01/01/2020
-        lastDay: 05/01/2020
+        effort: 5
+        firstDay: 01/01/2021
       fifi:
-        duration: 2
+        effort: 2

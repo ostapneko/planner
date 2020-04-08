@@ -1,12 +1,13 @@
 package main
 
 import (
-	"encoding/json"
+	"fmt"
 	"github.com/ostapneko/planner"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"log"
 	"os"
+	"time"
 )
 
 func main() {
@@ -42,7 +43,14 @@ func main() {
 		log.Fatalf("inconsistent planning: %s", err)
 	}
 
-	doc, _ := json.Marshal(planning)
+	now, err := planner.DateToDay(time.Now().Format("02/01/2006"))
+	if err != nil {
+		log.Fatalf("could not parse date, something is seriously wrong: %s", err)
+	}
 
-	log.Printf("%s", doc)
+	planner.ForecastCompletion(planning, now)
+
+	doc, _ := yaml.Marshal(planning)
+
+	fmt.Println(string(doc))
 }

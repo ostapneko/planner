@@ -2,14 +2,15 @@ package planner
 
 import (
 	"fmt"
+	"sort"
 )
 
 type Planning struct {
-	Calendar     []Day
+	Calendar     Days
 	Developers   []*Developer
 	SupportWeeks []*SupportWeek `yaml:"supportWeeks"`
 	// tasks are sorted in priority order: highest priority first
-	Tasks        []*Task        `yaml:"tasks"`
+	Tasks []*Task `yaml:"tasks"`
 }
 
 type DeveloperId string
@@ -17,6 +18,19 @@ type DeveloperId string
 type EffortDays int
 
 type Day int
+type Days []Day
+
+func (d Days) Len() int {
+	return len(d)
+}
+
+func (d Days) Less(i, j int) bool {
+	return d[i] < d[j]
+}
+
+func (d Days) Swap(i, j int) {
+	d[i], d[j] = d[j], d[i]
+}
 
 type Task struct {
 	Name         string
@@ -32,7 +46,7 @@ type Attribution struct {
 
 type Developer struct {
 	Id      DeveloperId
-	OffDays []Day `yaml:"offDays"`
+	OffDays Days `yaml:"offDays"`
 }
 
 type SupportWeek struct {
@@ -65,7 +79,94 @@ func CheckPlanning(planning *Planning) error {
 	return nil
 }
 
-//check devs in support weeks exist
+func ForecastCompletion(planning *Planning, now Day) {
+	devToDays := make(map[DeveloperId][]Day)
+	for _, developer := range planning.Developers {
+		devToDays[developer.Id] = availableDays(developer, planning.Calendar, planning.SupportWeeks, now)
+	}
+
+	for _, task := range planning.Tasks {
+		// skip finished tasks
+		if task.LastDay != nil && *task.LastDay < now {
+			continue
+		}
+
+		// for each attribution, add days from allocatable developer days
+		// until those days are equal to the attribution's effort day, or until we run out
+		// along the way, we bump the last attribution day and assign it to the attributions in case there
+		// is enough allocated days to fulfill the attribution
+		for developerId, attribution := range task.Attributions {
+			var attributedEffort EffortDays = 0
+
+			var lastAttrDay *Day
+			if len(devToDays[developerId]) > 0 {
+				attribution.FirstDay = &devToDays[developerId][0]
+			}
+
+			for len(devToDays[developerId]) > 0 && attributedEffort < attribution.EffortDays {
+				// pop the earliest day
+				lastAttrDay = &devToDays[developerId][0]
+				devToDays[developerId] = devToDays[developerId][1:]
+				attributedEffort += 1
+			}
+
+			if attributedEffort == attribution.EffortDays {
+				attribution.LastDay = lastAttrDay
+			}
+
+		}
+
+		// if all attributions are fulfilled, update the task's last day
+		var lastDay *Day
+		allAttrAreFulfilled := true
+		for _, attribution := range task.Attributions {
+			if attribution.LastDay == nil {
+				allAttrAreFulfilled = false
+				break
+			}
+
+			if lastDay == nil || *attribution.LastDay > *lastDay {
+				lastDay = attribution.LastDay
+			}
+		}
+
+		if allAttrAreFulfilled {
+			task.LastDay = lastDay
+		}
+	}
+}
+
+func availableDays(dev *Developer, cal Days, weeks []*SupportWeek, now Day) []Day {
+	res := make(Days, 0)
+	offDays := map[Day]bool{}
+	for _, day := range dev.OffDays {
+		offDays[day] = true
+	}
+	supportDays := supportWeekDays(weeks)
+
+	for _, day := range cal {
+		_, isOff := offDays[day]
+		_, isSupport := supportDays[day]
+		isInFuture := day >= now
+		if !isOff && !isSupport && isInFuture {
+			res = append(res, day)
+		}
+	}
+	sort.Sort(res)
+	return res
+}
+
+func supportWeekDays(weeks []*SupportWeek) map[Day]bool {
+	res := map[Day]bool{}
+	for _, week := range weeks {
+		for i := week.FirstDay; i <= week.LastDay; i++ {
+			res[i] = true
+		}
+	}
+	return res
+}
+
+// check devs in support weeks exist
 // check support weeks are not overlapping, and that weeks are not empty
 func checkSupportWeeks(supportWeeks []*SupportWeek, devMap map[DeveloperId]*Developer) error {
 	minWeek := Day(1e6)
