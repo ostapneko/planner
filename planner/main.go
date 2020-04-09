@@ -91,7 +91,7 @@ func main() {
 
 			if c.IsSet("gantt") {
 				gantFile := c.String("gantt")
-				file, err  := os.OpenFile(gantFile, os.O_WRONLY | os.O_CREATE, 0644)
+				file, err := os.OpenFile(gantFile, os.O_WRONLY|os.O_CREATE, 0644)
 				if err != nil {
 					log.Fatalf("could not write Gantt chart to %s", gantFile)
 				}

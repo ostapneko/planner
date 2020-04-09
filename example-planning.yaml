@@ -5,9 +5,13 @@ developers:
   - id: riri
     offDays:
       - 01/01/2021
+    starts:
+      - 01/01/2020
   - id: fifi
     offDays:
       - 02/01/2021
+    ends:
+      - 01/05/2020
 supportWeeks:
   - firstDay: 01/01/2021
     lastDay: 07/01/2021

@@ -12,7 +12,6 @@ func Test_checkPlanning(t *testing.T) {
 	dev1Id := DeveloperId("dev1")
 
 	var day1 Day = 1
-	var day2 Day = 2
 	var day5 Day = 5
 
 	holidays := []Day{3, 4}
@@ -25,46 +24,9 @@ func Test_checkPlanning(t *testing.T) {
 		},
 	}
 
-	attributionsWrongEffort := map[DeveloperId]*Attribution{
-		dev1Id: {
-			EffortDays: 5,
-			FirstDay:   &day2,
-			LastDay:    &day5,
-		},
-	}
-
-	attributionsOnlyLastDay := map[DeveloperId]*Attribution{
-		dev1Id: {
-			EffortDays: 5,
-			LastDay:    &day5,
-		},
-	}
-
 	task1 := &Task{
 		Name:         "Task",
 		Attributions: attributions1,
-	}
-
-	taskAttributionWrongEffort := &Task{
-		Name:         "WrongTask",
-		Attributions: attributionsWrongEffort,
-	}
-
-	taskAttributionOnlyLastDay := &Task{
-		Name:         "Only Last Day",
-		Attributions: attributionsOnlyLastDay,
-	}
-
-	taskLastDayNoAttribution := &Task{
-		Name:         "No attribution with last day",
-		Attributions: make(map[DeveloperId]*Attribution, 0),
-		LastDay:      &day1,
-	}
-
-	taskInconsistentLastDay := &Task{
-		Name:         "Inconsistent last day",
-		Attributions: make(map[DeveloperId]*Attribution, day2),
-		LastDay:      &day1,
 	}
 
 	dev1 := &Developer{
@@ -116,46 +78,6 @@ func Test_checkPlanning(t *testing.T) {
 				Tasks:        []*Task{task1},
 				Developers:   []*Developer{dev2},
 				SupportWeeks: []*SupportWeek{sw2},
-				Holidays:     holidays,
-			}},
-			wantErr: true,
-		},
-		{
-			name: "Wrong attribution effort",
-			args: args{&Planning{
-				Tasks:        []*Task{taskAttributionWrongEffort},
-				Developers:   []*Developer{dev1},
-				SupportWeeks: []*SupportWeek{sw1},
-				Holidays:     holidays,
-			}},
-			wantErr: true,
-		},
-		{
-			name: "Wrong attribution effort",
-			args: args{&Planning{
-				Tasks:        []*Task{taskAttributionOnlyLastDay},
-				Developers:   []*Developer{dev1},
-				SupportWeeks: []*SupportWeek{sw1},
-				Holidays:     holidays,
-			}},
-			wantErr: true,
-		},
-		{
-			name: "Task last day but no attribution last day",
-			args: args{&Planning{
-				Tasks:        []*Task{taskLastDayNoAttribution},
-				Developers:   []*Developer{dev1},
-				SupportWeeks: []*SupportWeek{sw1},
-				Holidays:     holidays,
-			}},
-			wantErr: true,
-		},
-		{
-			name: "Inconsistent last day",
-			args: args{&Planning{
-				Tasks:        []*Task{taskInconsistentLastDay},
-				Developers:   []*Developer{dev1},
-				SupportWeeks: []*SupportWeek{sw1},
 				Holidays:     holidays,
 			}},
 			wantErr: true,

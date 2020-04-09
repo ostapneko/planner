@@ -48,6 +48,8 @@ type Attribution struct {
 type Developer struct {
 	Id      DeveloperId
 	OffDays Days `yaml:"offDays"`
+	Starts  *Day `yaml:"starts"`
+	Leaves    *Day `yaml:"leaves"`
 }
 
 type SupportWeek struct {
@@ -114,12 +116,15 @@ func ForecastCompletion(planning *Planning) {
 
 	// devToLatestDay associate a the latest day that was allocated for each developer
 	// as we go through each task and each attribution by order of priority, we are going to increment this day
-	// until we find a non-holiday, non-off-day, non-support-week-day, non-week ends for this developer, and repeat until
+	// until we find a non-holiday, non-off-day, non-support-week-day, non-week leaves for this developer, and repeat until
 	// all the effort days for all attributions have been fullfilled
 	devToLatestDay := make(map[DeveloperId]Day)
 
 	for _, developer := range planning.Developers {
 		devToLatestDay[developer.Id] = planning.StartDay
+		if developer.Starts != nil {
+			devToLatestDay[developer.Id] = *developer.Starts
+		}
 	}
 
 	for _, task := range planning.Tasks {
@@ -197,10 +202,12 @@ func checkSupportWeeks(supportWeeks []*SupportWeek, devMap map[DeveloperId]*Deve
 
 func checkTasks(tasks []*Task, devMap map[DeveloperId]*Developer, holidaysMap map[Day]interface{}, supportWeeks []*SupportWeek) error {
 	for _, t := range tasks {
-		var latestLastDay Day = 0
-		var allAttributionsHaveLastDay = true
-		for devId, attr := range t.Attributions {
-			dev, devPrs := devMap[devId]
+		if len(t.Attributions) == 0 {
+			return fmt.Errorf("task %s needs to have at least one attribution", t.Name)
+		}
+
+		for devId := range t.Attributions {
+			_, devPrs := devMap[devId]
 			if !devPrs {
 				return fmt.Errorf("developer %s mentioned in Task %v does not exist", devId, t)
 			}
@@ -211,78 +218,7 @@ func checkTasks(tasks []*Task, devMap map[DeveloperId]*Developer, holidaysMap ma
 					devSupportWeeks = append(devSupportWeeks, w)
 				}
 			}
-
-			if attr.LastDay != nil && attr.FirstDay != nil {
-				computedEffortDays := effort(*attr.FirstDay, *attr.LastDay, holidaysMap, dev.OffDays, devSupportWeeks)
-				if attr.EffortDays != computedEffortDays {
-					return fmt.Errorf("effort is inconsistent for attribution %+v of task %s. Should be %d, but got %d", *attr, t.Name, computedEffortDays, attr.EffortDays)
-				}
-			}
-
-			if attr.LastDay != nil && attr.FirstDay == nil {
-				return fmt.Errorf("attribution %+v of task %s has a last day but no first day", *attr, t.Name)
-			}
-
-			if attr.LastDay != nil && *attr.LastDay > latestLastDay {
-				latestLastDay = *attr.LastDay
-			}
-
-			if attr.LastDay == nil {
-				allAttributionsHaveLastDay = false
-			}
-		}
-
-		if latestLastDay == 0 && t.LastDay != nil {
-			return fmt.Errorf("task %s has a last day but no attribution has a last day", t.Name)
-		}
-
-		if allAttributionsHaveLastDay && t.LastDay != nil && *t.LastDay != latestLastDay {
-			return fmt.Errorf("task %s has a LastDay inconsistent with its attributions", t.Name)
 		}
 	}
 	return nil
-}
-
-func effort(firstDay Day, lastDay Day, holidays map[Day]interface{}, offDays []Day, weeks []*SupportWeek) EffortDays {
-	res := 0
-	for i := firstDay; i < lastDay+1; i++ {
-		// skip holidays
-		if _, prs := holidays[i]; prs {
-			continue
-		}
-
-		// skip off days
-		isOffDay := false
-		for _, d := range offDays {
-			if d == i {
-				isOffDay = true
-			}
-		}
-
-		if isOffDay {
-			continue
-		}
-
-		// skip weekends
-		weekDay := DayToTime(i).Weekday()
-		if weekDay == time.Saturday || weekDay == time.Sunday {
-			continue
-		}
-
-		// skip support days
-		isSupportDay := false
-		for _, w := range weeks {
-			if i >= w.FirstDay && i <= w.LastDay {
-				isSupportDay = true
-			}
-		}
-
-		if isSupportDay {
-			continue
-		}
-
-		res++
-	}
-
-	return EffortDays(res)
 }

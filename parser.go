@@ -30,6 +30,8 @@ type SupportWeekInput struct {
 type DeveloperInput struct {
 	Id      DeveloperId
 	OffDays []string `yaml:"offDays"`
+	Starts  *string  `yaml:"starts,omitempty"`
+	Leaves    *string  `yaml:"leaves,omitempty"`
 }
 
 func NewPlanning(input PlanningInput) (*Planning, error) {
@@ -95,9 +97,29 @@ func newDeveloper(input *DeveloperInput) (*Developer, error) {
 		offDays[i] = d
 	}
 
+	var starts *Day
+	if input.Starts != nil {
+		day, err := DateToDay(*input.Starts)
+		if err != nil {
+			return nil, err
+		}
+		starts = &day
+	}
+
+	var leaves *Day
+	if input.Leaves != nil {
+		day, err := DateToDay(*input.Leaves)
+		if err != nil {
+			return nil, err
+		}
+		leaves = &day
+	}
+
 	return &Developer{
 		Id:      input.Id,
 		OffDays: offDays,
+		Starts:  starts,
+		Leaves:    leaves,
 	}, nil
 }
 
@@ -175,10 +197,22 @@ func NewPlanningInput(planning *Planning) *PlanningInput {
 		for j, day := range developer.OffDays {
 			offDays[j] = DayToDate(day)
 		}
+		var starts *string
+		if developer.Starts != nil {
+			date := DayToDate(*developer.Starts)
+			starts = &date
+		}
+		var leaves *string
+		if developer.Leaves != nil {
+			date := DayToDate(*developer.Leaves)
+			leaves = &date
+		}
 
 		developers[i] = &DeveloperInput{
 			Id:      developer.Id,
 			OffDays: offDays,
+			Starts:  starts,
+			Leaves:    leaves,
 		}
 	}
 

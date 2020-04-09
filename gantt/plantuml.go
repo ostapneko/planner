@@ -37,7 +37,7 @@ func (g *drawer) drawLine(firstDay planner.Day, lastDay planner.Day, name string
 }
 
 func (g *drawer) drawMilestone(day planner.Day, name string) string {
-	return fmt.Sprintf("[<font:sans>%s completed] happens on %s\n", name, dayToPlantUMLDate(day))
+	return fmt.Sprintf("[<font:sans>%s] happens on %s\n", name, dayToPlantUMLDate(day))
 }
 
 type writer struct {
@@ -68,8 +68,8 @@ func ToPlantUML(planning *planner.Planning, w io.Writer) {
 	writer.closedDays()
 	writer.projectStart()
 	writer.tasks()
-	writer.supportWeeks()
 	writer.offdays()
+	writer.supportWeeks()
 	writer.end()
 }
 
@@ -107,7 +107,7 @@ func (writer *writer) tasks() {
 			line := writer.drawer.drawLine(*firstDay, *lastDay, task.Name, developerId)
 			writer.writeStr(line)
 		}
-		milestone := writer.drawer.drawMilestone(*task.LastDay, task.Name)
+		milestone := writer.drawer.drawMilestone(*task.LastDay, fmt.Sprintf("%s completed", task.Name))
 		writer.writeStr(milestone)
 	}
 }
@@ -128,9 +128,17 @@ func (writer *writer) end() {
 func (writer *writer) offdays() {
 	writer.section("Vacations")
 	for _, developer := range writer.planning.Developers {
+		// start
+		if developer.Starts != nil {
+			ms := writer.drawer.drawMilestone(*developer.Starts, fmt.Sprintf("%s starts", developer.Id))
+			writer.writeStr(ms)
+		}
+
+		// vacations
+		// find contiguous days and make a line out of them
+
 		days := developer.OffDays
 		sort.Sort(days)
-		// find contiguous days and make a line out of them
 		var firstDay *planner.Day
 		var lastDay *planner.Day
 
@@ -163,6 +171,12 @@ func (writer *writer) offdays() {
 			i++
 			line := writer.drawer.drawLine(*firstDay, *lastDay, fmt.Sprintf("%s - %d", developer.Id, i), developer.Id)
 			writer.writeStr(line)
+		}
+
+		// end
+		if developer.Leaves != nil {
+			ms := writer.drawer.drawMilestone(*developer.Leaves, fmt.Sprintf("%s leaves", developer.Id))
+			writer.writeStr(ms)
 		}
 	}
 }
