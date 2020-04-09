@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"github.com/ostapneko/planner"
 	"io"
-	"strings"
+	"log"
+	"sort"
 	"time"
 )
 
@@ -53,9 +54,7 @@ func newWriter(planning *planner.Planning, w io.Writer, drawer *drawer) *writer 
 	return &writer{planning: planning, w: w, drawer: drawer}
 }
 
-func ToPlantUML(planning *planner.Planning) string {
-	var b strings.Builder
-
+func ToPlantUML(planning *planner.Planning, w io.Writer) {
 	devToColor := map[planner.DeveloperId]Color{}
 	for i, developer := range planning.Developers {
 		color := colors[i % len(colors)]
@@ -63,16 +62,19 @@ func ToPlantUML(planning *planner.Planning) string {
 	}
 
 	drawer := newDrawer(devToColor)
-	writer := newWriter(planning, &b, drawer)
+	writer := newWriter(planning, w, drawer)
 
 	writer.header()
 	writer.closedDays()
 	writer.projectStart()
 	writer.tasks()
 	writer.supportWeeks()
+	writer.offdays()
 	writer.end()
+}
 
-	return b.String()
+func (writer *writer) section(str string) {
+	writer.writeStr(fmt.Sprintf("-- %s --\n", str))
 }
 
 func (writer *writer) header() {
@@ -93,6 +95,7 @@ func (writer *writer) projectStart() {
 }
 
 func (writer *writer) tasks() {
+	writer.section("Roadmap")
 	for _, task := range writer.planning.Tasks {
 		for developerId, attribution := range task.Attributions {
 			firstDay := attribution.FirstDay
@@ -110,7 +113,7 @@ func (writer *writer) tasks() {
 }
 
 func (writer *writer) supportWeeks() {
-	writer.writeStr("-- Support Weeks --\n")
+	writer.section("Support Weeks")
 	for i, week := range writer.planning.SupportWeeks {
 		name := fmt.Sprintf("Support Week %d", i)
 		line := writer.drawer.drawLine(week.FirstDay, week.LastDay, name, week.DevId)
@@ -120,6 +123,48 @@ func (writer *writer) supportWeeks() {
 
 func (writer *writer) end() {
 	writer.writeStr("@endgantt")
+}
+
+func (writer *writer) offdays() {
+	writer.section("Vacations")
+	for _, developer := range writer.planning.Developers {
+		days := developer.OffDays
+		sort.Sort(days)
+		// find contiguous days and make a line out of them
+		var firstDay *planner.Day
+		var lastDay *planner.Day
+
+		i := 0
+		for _, day := range days {
+			d := day
+			if firstDay == nil {
+				firstDay = &d
+				lastDay = &d
+				continue
+			}
+
+			if lastDay == nil {
+				log.Fatalf("Unreachable code")
+			}
+
+			if int(d) == int(*lastDay) + 1 {
+				lastDay = &d
+				continue
+			}
+
+			i++
+			line := writer.drawer.drawLine(*firstDay, *lastDay, fmt.Sprintf("%s - %d", developer.Id, i), developer.Id)
+			writer.writeStr(line)
+			firstDay = &d
+			lastDay = &d
+		}
+
+		if firstDay != nil && lastDay != nil {
+			i++
+			line := writer.drawer.drawLine(*firstDay, *lastDay, fmt.Sprintf("%s - %d", developer.Id, i), developer.Id)
+			writer.writeStr(line)
+		}
+	}
 }
 
 // from  18307 (nb of days since epoch) -> 15/02/2020
