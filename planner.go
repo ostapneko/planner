@@ -112,7 +112,6 @@ func ForecastCompletion(planning *Planning) {
 		}
 	}
 
-
 	// devToLatestDay associate a the latest day that was allocated for each developer
 	// as we go through each task and each attribution by order of priority, we are going to increment this day
 	// until we find a non-holiday, non-off-day, non-support-week-day, non-week ends for this developer, and repeat until
@@ -196,7 +195,7 @@ func checkSupportWeeks(supportWeeks []*SupportWeek, devMap map[DeveloperId]*Deve
 	return nil
 }
 
-func checkTasks(tasks []*Task, devMap map[DeveloperId]*Developer, calendarMap map[Day]interface{}, supportWeeks []*SupportWeek) error {
+func checkTasks(tasks []*Task, devMap map[DeveloperId]*Developer, holidaysMap map[Day]interface{}, supportWeeks []*SupportWeek) error {
 	for _, t := range tasks {
 		var latestLastDay Day = 0
 		var allAttributionsHaveLastDay = true
@@ -214,7 +213,7 @@ func checkTasks(tasks []*Task, devMap map[DeveloperId]*Developer, calendarMap ma
 			}
 
 			if attr.LastDay != nil && attr.FirstDay != nil {
-				computedEffortDays := effort(*attr.FirstDay, *attr.LastDay, calendarMap, dev.OffDays, devSupportWeeks)
+				computedEffortDays := effort(*attr.FirstDay, *attr.LastDay, holidaysMap, dev.OffDays, devSupportWeeks)
 				if attr.EffortDays != computedEffortDays {
 					return fmt.Errorf("effort is inconsistent for attribution %+v of task %s. Should be %d, but got %d", *attr, t.Name, computedEffortDays, attr.EffortDays)
 				}
@@ -247,7 +246,7 @@ func checkTasks(tasks []*Task, devMap map[DeveloperId]*Developer, calendarMap ma
 func effort(firstDay Day, lastDay Day, holidays map[Day]interface{}, offDays []Day, weeks []*SupportWeek) EffortDays {
 	res := 0
 	for i := firstDay; i < lastDay+1; i++ {
-		// skip holidays not in calendar
+		// skip holidays
 		if _, prs := holidays[i]; prs {
 			continue
 		}
@@ -261,6 +260,12 @@ func effort(firstDay Day, lastDay Day, holidays map[Day]interface{}, offDays []D
 		}
 
 		if isOffDay {
+			continue
+		}
+
+		// skip weekends
+		weekDay := DayToTime(i).Weekday()
+		if weekDay == time.Saturday || weekDay == time.Sunday {
 			continue
 		}
 
