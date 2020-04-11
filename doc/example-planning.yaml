@@ -1,0 +1,43 @@
+startDay: 01/01/2021
+holidays:
+  - 05/01/2021
+  - 06/01/2021
+  - 07/01/2021
+developers:
+  - id: Alice
+    offDays:
+      - 01/02/2021
+    starts: 01/01/2021
+  - id: Bob
+    offDays:
+      - 02/02/2021
+      - 03/02/2021
+      - 04/02/2021
+    starts: 04/01/2021
+    ends: 01/03/2021
+supportWeeks:
+  - firstDay: 01/01/2021
+    lastDay: 07/01/2021
+    devId: Alice
+  - firstDay: 08/01/2021
+    lastDay: 14/01/2021
+    devId: Bob
+  - firstDay: 15/01/2021
+    lastDay: 21/01/2021
+    devId: Alice
+  - firstDay: 22/01/2021
+    lastDay: 28/01/2021
+    devId: Bob
+tasks:
+  - name: Feature 1
+    attributions:
+      Alice:
+        effort: 10
+      Bob:
+        effort: 5
+  - name: Feature 2
+    attributions:
+      Alice:
+        effort: 6
+      Bob:
+        effort: 13

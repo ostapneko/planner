@@ -1,0 +1,107 @@
+@startgantt
+printscale daily
+saturday are closed
+sunday are closed
+2021/01/05 is closed
+2021/01/06 is closed
+2021/01/07 is closed
+Project starts on 2021/01/01
+-- Roadmap --
+[<font:sans>Feature 1 (Alice)] is colored in LightCoral and starts on 2021/01/08 and ends on 2021/01/28
+[<font:sans>Feature 1 (Bob)] is colored in LightGreen and starts on 2021/01/04 and ends on 2021/01/20
+[<font:sans>Feature 1 completed] happens on 2021/01/28
+[<font:sans>Feature 2 (Bob)] is colored in LightGreen and starts on 2021/01/21 and ends on 2021/02/18
+[<font:sans>Feature 2 (Alice)] is colored in LightCoral and starts on 2021/01/29 and ends on 2021/02/08
+[<font:sans>Feature 2 completed] happens on 2021/02/18
+-- Vacations --
+[<font:sans>Alice starts] happens on 2021/01/01
+[<font:sans>Alice - 1 (Alice)] is colored in LightCoral and starts on 2021/02/01 and ends on 2021/02/01
+[<font:sans>Bob starts] happens on 2021/01/04
+[<font:sans>Bob - 1 (Bob)] is colored in LightGreen and starts on 2021/02/02 and ends on 2021/02/04
+-- Support Weeks --
+[<font:sans>Support Week 0 (Alice)] is colored in LightCoral and starts on 2021/01/01 and ends on 2021/01/07
+[<font:sans>Support Week 1 (Bob)] is colored in LightGreen and starts on 2021/01/08 and ends on 2021/01/14
+[<font:sans>Support Week 2 (Alice)] is colored in LightCoral and starts on 2021/01/15 and ends on 2021/01/21
+[<font:sans>Support Week 3 (Bob)] is colored in LightGreen and starts on 2021/01/22 and ends on 2021/01/28
+@endgantt on 2021/01/15 and ends on 2021/01/21
+[<font:sans>Support Week 3 (Bob)] is colored in LightGreen and starts on 2021/01/22 and ends on 2021/01/28
+@endganttntt)] is colored in LightCoral and starts on 2020/04/01 and ends on 2020/04/07
+[<font:sans>Bookmarkable search completed] happens on 2020/04/07
+[<font:sans>Display tagged media (ygal)] is colored in LightBlue and starts on 2020/04/14 and ends on 2020/04/17
+[<font:sans>Display tagged media completed] happens on 2020/04/17
+[<font:sans>Media codes fix (ygal)] is colored in LightBlue and starts on 2020/04/20 and ends on 2020/04/22
+[<font:sans>Media codes fix completed] happens on 2020/04/22
+[<font:sans>Collections in admin (ygal)] is colored in LightBlue and starts on 2020/04/23 and ends on 2020/05/22
+[<font:sans>Collections in admin completed] happens on 2020/05/22
+[<font:sans>Handle user removal (christopher)] is colored in LightCoral and starts on 2020/04/08 and ends on 2020/04/17
+[<font:sans>Handle user removal completed] happens on 2020/04/17
+[<font:sans>Rework filters (christopher)] is colored in LightCoral and starts on 2020/04/27 and ends on 2020/05/28
+[<font:sans>Rework filters completed] happens on 2020/05/28
+[<font:sans>Account linking (christopher)] is colored in LightCoral and starts on 2020/05/29 and ends on 2020/06/05
+[<font:sans>Account linking completed] happens on 2020/06/05
+[<font:sans>Experiment media clustering (gabriel)] is colored in LightGreen and starts on 2020/03/02 and ends on 2020/03/20
+[<font:sans>Experiment media clustering completed] happens on 2020/03/20
+[<font:sans>Experiment product similarity (gabriel)] is colored in LightGreen and starts on 2020/03/30 and ends on 2020/04/22
+[<font:sans>Experiment product similarity completed] happens on 2020/04/22
+[<font:sans>Similar media (christopher)] is colored in LightCoral and starts on 2020/06/08 and ends on 2020/06/12
+[<font:sans>Similar media (ygal)] is colored in LightBlue and starts on 2020/05/25 and ends on 2020/05/29
+[<font:sans>Similar media completed] happens on 2020/06/12
+[<font:sans>IP right center (christopher)] is colored in LightCoral and starts on 2020/06/22 and ends on 2020/08/05
+[<font:sans>IP right center completed] happens on 2020/08/05
+[<font:sans>User posts (thibaut)] is colored in Gold and starts on 2020/05/05 and ends on 2020/06/04
+[<font:sans>User posts completed] happens on 2020/06/04
+[<font:sans>Remove Mongo as media store (gabriel)] is colored in LightGreen and starts on 2020/04/23 and ends on 2020/05/14
+[<font:sans>Remove Mongo as media store (thibaut)] is colored in Gold and starts on 2020/06/05 and ends on 2020/07/09
+[<font:sans>Remove Mongo as media store completed] happens on 2020/07/09
+[<font:sans>Martin onboarding (martin)] is colored in LightGray and starts on 2020/06/15 and ends on 2020/06/19
+[<font:sans>Martin onboarding completed] happens on 2020/06/19
+[<font:sans>Custom media labels (martin)] is colored in LightGray and starts on 2020/06/22 and ends on 2020/07/10
+[<font:sans>Custom media labels (thibaut)] is colored in Gold and starts on 2020/07/10 and ends on 2020/07/24
+[<font:sans>Custom media labels (ygal)] is colored in LightBlue and starts on 2020/06/08 and ends on 2020/06/19
+[<font:sans>Custom media labels completed] happens on 2020/07/24
+[<font:sans>Canva integration (christopher)] is colored in LightCoral and starts on 2020/08/06 and ends on 2020/08/19
+[<font:sans>Canva integration completed] happens on 2020/08/19
+[<font:sans>Web-front deployment (christopher)] is colored in LightCoral and starts on 2020/08/20 and ends on 2020/08/21
+[<font:sans>Web-front deployment (martin)] is colored in LightGray and starts on 2020/07/13 and ends on 2020/07/27
+[<font:sans>Web-front deployment completed] happens on 2020/08/21
+[<font:sans>Brand assets as data source (christopher)] is colored in LightCoral and starts on 2020/08/24 and ends on 2020/08/28
+[<font:sans>Brand assets as data source (ygal)] is colored in LightBlue and starts on 2020/06/22 and ends on 2020/07/03
+[<font:sans>Brand assets as data source completed] happens on 2020/08/28
+[<font:sans>Automatic collection creation (ygal)] is colored in LightBlue and starts on 2020/07/06 and ends on 2020/07/27
+[<font:sans>Automatic collection creation completed] happens on 2020/07/27
+[<font:sans>Analytics (thibaut)] is colored in Gold and starts on 2020/07/27 and ends on 2020/08/07
+[<font:sans>Analytics (ygal)] is colored in LightBlue and starts on 2020/07/28 and ends on 2020/08/03
+[<font:sans>Analytics completed] happens on 2020/08/07
+[<font:sans>Permissions (ygal)] is colored in LightBlue and starts on 2020/08/04 and ends on 2020/08/31
+[<font:sans>Permissions (christopher)] is colored in LightCoral and starts on 2020/08/31 and ends on 2020/09/11
+[<font:sans>Permissions completed] happens on 2020/09/11
+-- Vacations --
+[<font:sans>christopher - 1 (christopher)] is colored in LightCoral and starts on 2020/05/04 and ends on 2020/05/07
+[<font:sans>christopher - 2 (christopher)] is colored in LightCoral and starts on 2020/05/11 and ends on 2020/05/15
+[<font:sans>christopher - 3 (christopher)] is colored in LightCoral and starts on 2020/05/22 and ends on 2020/05/22
+[<font:sans>christopher - 4 (christopher)] is colored in LightCoral and starts on 2020/05/25 and ends on 2020/05/25
+[<font:sans>gabriel - 1 (gabriel)] is colored in LightGreen and starts on 2020/04/09 and ends on 2020/04/10
+[<font:sans>ygal - 1 (ygal)] is colored in LightBlue and starts on 2020/03/10 and ends on 2020/03/10
+[<font:sans>ygal - 2 (ygal)] is colored in LightBlue and starts on 2020/04/09 and ends on 2020/04/10
+[<font:sans>ygal - 3 (ygal)] is colored in LightBlue and starts on 2020/04/15 and ends on 2020/04/16
+[<font:sans>vincent leaves] happens on 2020/05/07
+[<font:sans>martin starts] happens on 2020/06/15
+-- Support Weeks --
+[<font:sans>Support Week 0 (vincent)] is colored in LightPink and starts on 2020/03/02 and ends on 2020/03/06
+[<font:sans>Support Week 1 (thibaut)] is colored in Gold and starts on 2020/03/09 and ends on 2020/03/13
+[<font:sans>Support Week 2 (christopher)] is colored in LightCoral and starts on 2020/03/16 and ends on 2020/03/20
+[<font:sans>Support Week 3 (gabriel)] is colored in LightGreen and starts on 2020/03/23 and ends on 2020/03/27
+[<font:sans>Support Week 4 (ygal)] is colored in LightBlue and starts on 2020/03/30 and ends on 2020/04/03
+[<font:sans>Support Week 5 (vincent)] is colored in LightPink and starts on 2020/04/06 and ends on 2020/04/10
+[<font:sans>Support Week 6 (thibaut)] is colored in Gold and starts on 2020/04/13 and ends on 2020/04/17
+[<font:sans>Support Week 7 (christopher)] is colored in LightCoral and starts on 2020/04/20 and ends on 2020/04/24
+[<font:sans>Support Week 8 (gabriel)] is colored in LightGreen and starts on 2020/04/27 and ends on 2020/05/01
+[<font:sans>Support Week 9 (ygal)] is colored in LightBlue and starts on 2020/05/04 and ends on 2020/05/08
+[<font:sans>Support Week 10 (thibaut)] is colored in Gold and starts on 2020/05/11 and ends on 2020/05/15
+[<font:sans>Support Week 11 (christopher)] is colored in LightCoral and starts on 2020/05/18 and ends on 2020/05/22
+[<font:sans>Support Week 12 (gabriel)] is colored in LightGreen and starts on 2020/05/25 and ends on 2020/05/29
+[<font:sans>Support Week 13 (ygal)] is colored in LightBlue and starts on 2020/06/01 and ends on 2020/06/05
+[<font:sans>Support Week 14 (thibaut)] is colored in Gold and starts on 2020/06/08 and ends on 2020/06/12
+[<font:sans>Support Week 15 (christopher)] is colored in LightCoral and starts on 2020/06/15 and ends on 2020/06/19
+[<font:sans>Support Week 16 (gabriel)] is colored in LightGreen and starts on 2020/06/22 and ends on 2020/06/26
+@endgantt
