@@ -13,6 +13,8 @@ import (
 
 func main() {
 	app := &cli.App{
+		Name:        "Planner",
+		Description: "This program computes task completion dates, given a team of developers staffed on them, as well as date constrains, such as holidays.\nIt takes a YAML file describing these constrains as input, and outputs a file with the same content, except for the task completion dates, which are regenerated.\nIt can also output a Gantt chart in a PlantUML-compatible format. The generation of the image representation of this chart is not supportde by the program itself.",
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:      "out",
