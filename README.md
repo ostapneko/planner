@@ -42,6 +42,8 @@ developers:
     # First work day, when a developer joins the team or the company
     starts: 01/01/2021
   - id: Bob
+    # Part of the time Bob is assigned to feature work
+    utilization: 0.4
     starts: 04/01/2021
     # Last work day, when a developer leaves the team or the company
     ends: 01/03/2021

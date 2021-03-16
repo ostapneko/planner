@@ -2,6 +2,7 @@ package planner
 
 import (
 	"fmt"
+	"math"
 	"time"
 )
 
@@ -50,6 +51,7 @@ type Developer struct {
 	OffDays Days `yaml:"offDays"`
 	Starts  *Day `yaml:"starts"`
 	Leaves    *Day `yaml:"leaves"`
+	Utilization float64 `yaml:"utilization"`
 }
 
 type SupportWeek struct {
@@ -114,6 +116,12 @@ func ForecastCompletion(planning *Planning) {
 		}
 	}
 
+	devToUtilization := make(map[DeveloperId]float64)
+
+	for _, developer := range planning.Developers {
+		devToUtilization[developer.Id] = developer.Utilization
+	}
+
 	// devToLatestDay associate a the latest day that was allocated for each developer
 	// as we go through each task and each attribution by order of priority, we are going to increment this day
 	// until we find a non-holiday, non-off-day, non-support-week-day, non-week leaves for this developer, and repeat until
@@ -134,7 +142,9 @@ func ForecastCompletion(planning *Planning) {
 			attribution.FirstDay = nil
 			attribution.LastDay = nil
 			var effort EffortDays = 0
-			for effort < attribution.EffortDays {
+			utilization := devToUtilization[developerId]
+			duration := int64(math.Ceil(float64(attribution.EffortDays) / utilization))
+			for int64(effort) < duration {
 				day := devToLatestDay[developerId]
 				// if the day is not off, increment the effort
 				if _, prs := devToOffDays[developerId][day]; !prs && !isWeekEnd(day) {

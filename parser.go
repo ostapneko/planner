@@ -32,6 +32,7 @@ type DeveloperInput struct {
 	OffDays []string `yaml:"offDays"`
 	Starts  *string  `yaml:"starts,omitempty"`
 	Leaves    *string  `yaml:"leaves,omitempty"`
+	Utilization float64 `yaml:"utilization"`
 }
 
 func NewPlanning(input PlanningInput) (*Planning, error) {
@@ -120,6 +121,7 @@ func newDeveloper(input *DeveloperInput) (*Developer, error) {
 		OffDays: offDays,
 		Starts:  starts,
 		Leaves:    leaves,
+		Utilization: input.Utilization,
 	}, nil
 }
 

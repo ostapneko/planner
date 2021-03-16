@@ -119,6 +119,7 @@ func TestForecastCompletion(t *testing.T) {
 		Attributions: map[DeveloperId]*Attribution{
 			"dev1": {EffortDays: 3},
 			"dev2": {EffortDays: 2},
+			"dev3": {EffortDays: 1},
 		},
 	}
 	task2 := &Task{
@@ -129,6 +130,7 @@ func TestForecastCompletion(t *testing.T) {
 				FirstDay:   &daySix,
 			},
 			"dev2": {EffortDays: 2},
+			"dev3": {EffortDays: 1},
 		},
 	}
 	task3 := &Task{
@@ -136,6 +138,7 @@ func TestForecastCompletion(t *testing.T) {
 		Attributions: map[DeveloperId]*Attribution{
 			"dev1": {EffortDays: 1},
 			"dev2": {EffortDays: 10},
+			"dev3": {EffortDays: 1},
 		},
 	}
 	planning := &Planning{
@@ -145,10 +148,16 @@ func TestForecastCompletion(t *testing.T) {
 			{
 				Id:      "dev1",
 				OffDays: []Day{1},
+				Utilization: 1,
 			},
 			{
 				Id:      "dev2",
 				OffDays: []Day{2},
+				Utilization: 1,
+			},
+			{
+				Id:          "dev3",
+				Utilization: 0.25,
 			},
 		},
 		SupportWeeks: []*SupportWeek{
@@ -176,14 +185,17 @@ func TestForecastCompletion(t *testing.T) {
 	// task1:
 	// dev1 (3d) : 4, 5, 6
 	// dev2 (2d): 1, 4
-	// last day: 5
+	// dev3 (1d / 0.25 = 4d): 1, 4, 5, 6
+	// last day: 6
 	// task2:
 	// dev1 (3d): 11, 12, 13
 	// dev2 (2d): 5, 6
-	// last day: 12
+	// dev3 (1d / 0.25 = 4d): 7, 8, 11, 12
+	// last day: 13
 	// task3:
 	// dev1 (1d): 14
 	// dev2 (10d): 7, 8, 11, 12, 13, 14, 15, 18, 19, 20
+	// dev3 (1d / 0.25 = 4d): 13, 14, 15, 18
 	// last day: 20
 
 	examples := []struct {
@@ -194,22 +206,28 @@ func TestForecastCompletion(t *testing.T) {
 		{act: *task1.Attributions["dev1"].LastDay, exp: 6},
 		{act: *task1.Attributions["dev2"].FirstDay, exp: 1},
 		{act: *task1.Attributions["dev2"].LastDay, exp: 4},
+		{act: *task1.Attributions["dev3"].FirstDay, exp: 1},
+		{act: *task1.Attributions["dev3"].LastDay, exp: 6},
 		{act: *task1.LastDay, exp: 6},
 		{act: *task2.Attributions["dev1"].FirstDay, exp: 11},
 		{act: *task2.Attributions["dev1"].LastDay, exp: 13},
 		{act: *task2.Attributions["dev2"].FirstDay, exp: 5},
 		{act: *task2.Attributions["dev2"].LastDay, exp: 6},
+		{act: *task2.Attributions["dev3"].FirstDay, exp: 7},
+		{act: *task2.Attributions["dev3"].LastDay, exp: 12},
 		{act: *task2.LastDay, exp: 13},
 		{act: *task3.Attributions["dev1"].FirstDay, exp: 14},
 		{act: *task3.Attributions["dev1"].LastDay, exp: 14},
 		{act: *task3.Attributions["dev2"].FirstDay, exp: 7},
 		{act: *task3.Attributions["dev2"].LastDay, exp: 20},
+		{act: *task3.Attributions["dev3"].FirstDay, exp: 13},
+		{act: *task3.Attributions["dev3"].LastDay, exp: 18},
 		{act: *task3.LastDay, exp: 20},
 	}
 
 	for i, example := range examples {
 		if example.act != example.exp {
-			t.Errorf("exp %d, got %d in example %d", example.exp, example.act, i + 1)
+			t.Errorf("exp %d, got %d in example %d", example.exp, example.act, i+1)
 		} else {
 			t.Logf("pass example %d", i)
 		}
