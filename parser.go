@@ -222,6 +222,7 @@ func NewPlanningInput(planning *Planning) *PlanningInput {
 			OffDays: offDays,
 			Starts:  starts,
 			Leaves:    leaves,
+			Utilization: &developer.Utilization,
 		}
 	}
 
