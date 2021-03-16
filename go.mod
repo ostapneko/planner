@@ -1,6 +1,6 @@
 module github.com/ostapneko/planner
 
-go 1.13
+go 1.15
 
 require (
 	github.com/urfave/cli/v2 v2.2.0
