@@ -47,10 +47,10 @@ type Attribution struct {
 }
 
 type Developer struct {
-	Id      DeveloperId
-	OffDays Days `yaml:"offDays"`
-	Starts  *Day `yaml:"starts"`
-	Leaves    *Day `yaml:"leaves"`
+	Id          DeveloperId
+	OffDays     Days    `yaml:"offDays"`
+	Starts      *Day    `yaml:"starts"`
+	Leaves      *Day    `yaml:"leaves"`
 	Utilization float64 `yaml:"utilization"`
 }
 
@@ -177,6 +177,10 @@ func isWeekEnd(day Day) bool {
 // check devs in support weeks exist
 // check support weeks are not overlapping, and that weeks are not empty
 func checkSupportWeeks(supportWeeks []*SupportWeek, devMap map[DeveloperId]*Developer) error {
+	if len(supportWeeks) == 0 {
+		return nil
+	}
+
 	minWeek := Day(1e6)
 	maxWeek := Day(0)
 	for _, week := range supportWeeks {
